@@ -94,27 +94,27 @@ INSERT INTO `categories` (`id`, `category`) VALUES
 -- Table structure for table `products`
 --
 
-CREATE TABLE `products` (
-  `product_id` int(11) NOT NULL,
-  `product_name` varchar(100) DEFAULT NULL,
-  `price` decimal(10,2) DEFAULT NULL,
-  `stock` int(11) DEFAULT NULL,
-  `image_path` varchar(255) DEFAULT NULL,
-  `category` varchar(50) DEFAULT NULL,
-  `branch` varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+-- CREATE TABLE `products` (
+--   `product_id` int(11) NOT NULL,
+--   `product_name` varchar(100) DEFAULT NULL,
+--   `price` decimal(10,2) DEFAULT NULL,
+--   `stock` int(11) DEFAULT NULL,
+--   `image_path` varchar(255) DEFAULT NULL,
+--   `category` varchar(50) DEFAULT NULL,
+--   `branch` varchar(50) DEFAULT NULL
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `products`
 --
 
-INSERT INTO `products` (`product_id`, `product_name`, `price`, `stock`, `image_path`, `category`, `branch`) VALUES
-(1, 'TEST-PRODUCT1', 15.00, 50, 'Biogesic.png', 'Medicine', 'San Miguel'),
-(2, 'TEST-PRODUCT2', 20.00, 35, 'Biogesic.png', 'Supplement', 'San Miguel'),
-(3, 'TEST-PRODUCT3', 12.00, 50, 'Biogesic.png', 'Hygiene', 'San Miguel'),
-(4, 'TEST-PRODUCT4', 25.00, 15, 'Biogesic.png', 'Contraceptive', 'San Isidro Norte'),
-(5, 'TEST_PRODUCT5', 15.00, 50, 'Biogesic.png', 'Baby Care', 'San Isidro Norte'),
-(6, 'TEST-PRODUCT6', 12.00, 35, 'Biogesic.png', 'Other', 'San Isidro Norte');
+-- INSERT INTO `products` (`product_id`, `product_name`, `price`, `stock`, `image_path`, `category`, `branch`) VALUES
+-- (1, 'TEST-PRODUCT1', 15.00, 50, 'Biogesic.png', 'Medicine', 'San Miguel'),
+-- (2, 'TEST-PRODUCT2', 20.00, 35, 'Biogesic.png', 'Supplement', 'San Miguel'),
+-- (3, 'TEST-PRODUCT3', 12.00, 50, 'Biogesic.png', 'Hygiene', 'San Miguel'),
+-- (4, 'TEST-PRODUCT4', 25.00, 15, 'Biogesic.png', 'Contraceptive', 'San Isidro Norte'),
+-- (5, 'TEST_PRODUCT5', 15.00, 50, 'Biogesic.png', 'Baby Care', 'San Isidro Norte'),
+-- (6, 'TEST-PRODUCT6', 12.00, 35, 'Biogesic.png', 'Other', 'San Isidro Norte');
 
 -- --------------------------------------------------------
 

@@ -19,7 +19,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!--- Custom CSS ----->
-    <?php include "../branch/css/styles.branch.php"; ?>
+    <link rel="stylesheet" href="css/branch.css">
+    <link rel="stylesheet" href="css/modal.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/5.1.0/css/bootstrap.min.css">
 
 </head>
 <body>

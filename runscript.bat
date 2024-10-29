@@ -1,1 +1,1 @@
-mysql --user=root --password=admin < lyza_system.sql
+mysql --user=root --password=admin < test.sql

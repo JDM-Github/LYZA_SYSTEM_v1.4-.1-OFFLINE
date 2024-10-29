@@ -1,111 +1,158 @@
-<?php 
-    include "admin_header.php"; 
-    include "admin_navigation.php";
-?>
+<div class="content ms-3">
 
-<!-- Main Body -------------------------------------------------------------------------------------------------------------->
 
-    <section class="container-fluid custom-main-wrapper col-md-12 overflow-y-scroll">
-        <!-- Main Layout -->
-        <div class="container">
-            <div class="custom-content-wrapper my-3">
+    <div id="main-content">
+        <div class="card shadow p-1 bg-body-tertiary rounded border-0 mb-3">
+            <div class="d-flex justify-content-between">
+                <p class="fw-bold border-start border-3 border-success px-4 m-3 mb-3">
+                    Dashboard
+                </p>
 
-                <!-- Sidebar -->
-                <?php include "admin_sidebar.php"; ?>
+                <form action="" class="border-0 d-flex m-1" method="post">
 
-                <!-- Main Content -->
-                <div class="content ms-3">
-                    <div id="main-content">
-                        <div class="card shadow p-0 bg-body-tertiary rounded border-0 mb-3">
-                            <p class=" fw-bold border-start border-3 border-success px-4 m-3">
-                                Stock Report
-                            </p>
-                        </div>
+                    <style>
+                        .border-dark-green {
+                            background: #56AB91;
+                        }
 
-                        <div class="d-flex mb-3">
-                            <?php include "includes/report/figure_rep.inc.php"?>
-                        </div>
+                        .border-dark-green:hover {
+                            background: #369B71;
+                        }
+                    </style>
+                    <button id="printChartButton" class="btn btn-success ms-3 border-dark-green" type="button"
+                        onclick="printStockHistory()">Download
+                        History</button>
 
-                        <!-- Product Status Table ----->
-                        <div class="card shadow p-3 bg-body-tertiary rounded border-0">
-                            <p class="fw-bold border-start border-3 border-success ps-4">
-                                Stock History
-                            </p>
-                            
-                            <div id="table-data">
-                                <!-- Content displayed and handled dynamically ----->
-                            </div>
-                        </div>
-                    </div>
-                </div>              
+                </form>
+
             </div>
         </div>
-    </section>
 
-<!-- Footer ---------------------------------------------------------------------------------------------------------------->
 
-    <footer class="text-center pt-2 custom-admin-footer">
-        <div class="container d-flex justify-content-between">
-            <div class="d-flex align-content-center">
-                <img src="../img/LyzaVectorLogoWhite.png" class="img rounded me-4" alt="Lyza Drugmart" width="30" height="30">
-                <p class="text-white p-1"><small>Copyright © 2024 Lyza Drugmart. All Rights Reserved.</small></p>
-            </div>
-            <div class="d-flex p-1">
-                <!----- Dashboard ----->
-                <a class="link-offset-2 link-underline link-underline-opacity-0 ps-4" href="admin.php" id="dashboard-tab">
-                    <p class="text-white">Dashboard</p>
-                </a> 
-                <!----- Transactions ----->
-                <a class="link-offset-2 link-underline link-underline-opacity-0 ps-4" href="admin_transaction_reports.php" id="transactions-tab">
-                    <p class="text-white">Transactions</p>
-                </a>
-                <!----- Stock History ----->
-                <a class="link-offset-2 link-underline link-underline-opacity-0 ps-4" href="admin_stock_reports.php" id="stocks-tab">
-                    <p class="text-white">Stock</p>
-                </a>
-                <!----- Product Status ----->
-                <a class="link-offset-2 link-underline link-underline-opacity-0 ps-4" href="admin_product_reports.php" id="products-tab">
-                    <p class="text-white">Products</p>
-                </a>
-                <!----- Accounts ----->
-                <a class="link-offset-2 link-underline link-underline-opacity-0 ps-4"  href="admin_accounts.php" id="accounts-tab">
-                    <p class="text-white">Accounts</p>
-                </a>
-            </div>
-        </div>
-    </footer>
+        <div class="card shadow p-3 bg-body-tertiary rounded border-0">
+            <div class="input-group input-group-sm border-0 align-content-center">
+                <p class=" fw-bold border-start border-3 border-success px-4 mb-3 me-5 align-content-center">
+                    Filter
+                </p>
+                <form action="" class="form-control border-0 d-flex bg-body-tertiary" method="post">
+                    <?php
+                    $branches = RequestSQL::getAllBranches();
+                    $sessionBranch = '';
+                    $sessionStaff = '';
+                    $sessionGroup = '';
 
-    <script>
-        
-        const ctx = document.getElementById('stockChart').getContext('2d');
-        const myChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Overall Stock', 'Overall Demand'],
-                    datasets: [{
-                    label: 'Rate',
-                    data: [12, 19],
-
-                    backgroundColor: [
-                        '#EE6055'
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
+                    $admin = RequestSQL::getSession('admin-stock-history');
+                    if ($admin) {
+                        $sessionBranch = $admin['branch'];
+                        $sessionStaff = $admin['staff'];
+                        $sessionGroup = $admin['groupBy'];
                     }
+                    $selectedBranch = isset($_POST['item-branch']) ? $_POST['item-branch'] : $sessionBranch;
+                    $selectedStaff = isset($_POST['staff']) ? $_POST['staff'] : $sessionStaff;
+                    $selectedGroup = isset($_POST['group-by']) ? $_POST['group-by'] : $sessionGroup;
+
+                    $staffs = RequestSQL::getAllStaff(true, $selectedBranch);
+
+                    function isSelected($option, $selectedValue)
+                    {
+                        return $option === $selectedValue ? 'selected' : '';
+                    }
+                    ?>
+
+                    <select class="form-select rounded mb-3 me-3" name="item-branch" id="item-branch">
+                        <option value="">-- Select Branches --</option>
+                        <?php
+                        if ($branches) {
+                            while ($branch = $branches->fetch_assoc()) {
+                                $branch_id = $branch['id'];
+                                $branchName = $branch['branch_name'];
+                                echo "<option value='{$branch_id}' " . isSelected($branch_id, $selectedBranch) . ">{$branchName}</option>";
+                            }
+                        }
+                        ?>
+                    </select>
+                    <select class="form-select rounded mb-3 me-3" name="staff" id="staff">
+                        <option value="">-- Select Staff --</option>
+                        <?php
+                        if ($staffs) {
+                            while ($staff = $staffs->fetch_assoc()) {
+                                $staffID = $staff['id'];
+                                $staffName = $staff['firstName'] . " " . $staff['lastName'];
+                                echo "<option value='{$staffID}' " . isSelected($staffID, $selectedStaff) . ">{$staffName}</option>";
+                            }
+                        }
+                        ?>
+                    </select>
+                    <select class="form-select rounded mb-3 me-3" name="group-by" id="group-by">
+                        <option value="">-- Group By --</option>
+                        <option value="daily" <?php echo isSelected('daily', $selectedGroup); ?>>Daily</option>
+                        <option value="weekly" <?php echo isSelected('weekly', $selectedGroup); ?>>Weekly</option>
+                        <option value="monthly" <?php echo isSelected('monthly', $selectedGroup); ?>>Monthly</option>
+                        <option value="semi-annually" <?php echo isSelected('semi-annually', $selectedGroup); ?>>
+                            Semi-Annually</option>
+                        <option value="annually" <?php echo isSelected('annually', $selectedGroup); ?>>Annually</option>
+                    </select>
+
+                    <button class="btn btn-secondary mb-3 rounded" type="submit">Search</button>
+                </form>
+            </div>
+
+            <div>
+                <?php
+                $data = RequestSQL::getAllStockHistory($selectedBranch, $selectedStaff);
+                $histories = $data['result'];
+                $currentPage = $data['page'];
+                $totalPages = $data['total'];
+                AdminClass::loadAllStockHistory($histories);
+                BranchClass::loadPaginator($currentPage, $totalPages, 'admin-stock-history-page');
+
+                $histories = RequestSQL::getAllStockAdmin($selectedBranch, $selectedStaff);
+                $historiesArray = [];
+                while ($row = $histories->fetch_assoc()) {
+                    $historiesArray[] = $row;
+                }
+                ?>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+    const ctx = document.getElementById('stockChart').getContext('2d');
+    const myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Overall Stock', 'Overall Demand'],
+            datasets: [{
+                label: 'Rate',
+                data: [12, 19],
+
+                backgroundColor: [
+                    '#EE6055'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
                 }
             }
-        });
+        }
+    });
 
-    </script>
-    
-    <!-- Stock Pagination -->
-    <script src="js/report/stock.report.js"></script>
-    
+</script>
 
-<?php include "admin_footer.php"; ?>
+<div id="errorToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive"
+    aria-atomic="true" style="position: absolute; top: 20px; right: 20px; display: none;">
+    <div class="d-flex">
+        <div class="toast-body">No stock history.</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" aria-label="Close"
+            onclick="closeToast('errorToast')"></button>
+    </div>
+</div>
 
+<?php include_once "admin/script/print_stock.php" ?>

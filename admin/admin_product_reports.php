@@ -1,106 +1,246 @@
-<?php 
-    include "admin_header.php"; 
-    include "admin_navigation.php";
-?>
+<div class="content ms-3" id="stocks">
 
-<!-- Main Body -------------------------------------------------------------------------------------------------------------->
+    <!-- Add New Product -->
+    <div class=" card shadow p-2 bg-body-tertiary rounded border-0 mb-3 ">
+        <form action="" method="post">
+            <div class="input-group input-group border-0 align-content-center p-2 pb-0">
+                <p class=" fw-bold border-start border-3 border-success px-4 mb-3 me-5 align-content-center">
+                    All Products
+                </p>
 
-    <section class="container-fluid custom-main-wrapper col-md-12">
+                <?php
+                $admin = RequestSQL::getSession('admin-stock');
 
-        <!-- Main Layout -->
-        <div class="container">
-            <div class="custom-content-wrapper my-3">
+                $sessionSearch = '';
+                if ($admin)
+                    $sessionSearch = $admin['search'];
+                $searchValue = isset($_POST['search-value']) ? $_POST['search-value'] : $sessionSearch;
+                ?>
 
-                <!-- Sidebar -->
-                <?php include "admin_sidebar.php"; ?>
+                <input type="text" class="form-control rounded-start mb-3" placeholder="Search..." name='search-value'
+                    aria-describedby="search-button-product" value="<?php echo $searchValue ?>">
 
-                <!-- Main Content -->
-                <div class="content ms-3">
-                    <div id="main-content">
-                        <!-- Add New Product -->
-                        <div class="card shadow p-3 bg-body-tertiary rounded border-0 mb-3 ">
-                            <div class="d-flex justify-content-between align-content-center">
-                                <p class="fw-bold border-start border-3 border-success px-4 my-1">
-                                    Product Status
-                                </p>
-                                <button class="btn btn-sm btn-secondary rounded border-0 mb-0 custom-add-new-product-btn" type="submit">Add New Product</button>
-                            </div>
-                        </div>
+                <button class="btn btn-sm rounded-end border px-3 mb-3 me-3" type="submit" id="search-button-product">
+                    <i class="bi bi-search"></i>
+                </button>
 
-                        <!-- Product Status Table ----->
-                        <div class="card shadow p-3 bg-body-tertiary rounded border-0">
-                            <div class="input-group input-group-sm border-0 align-content-center">
-                                <p class=" fw-bold border-start border-3 border-success px-4 mb-3 me-5 align-content-center">
-                                    Filter
-                                </p>
+                <button class="btn btn-secondary mb-3 rounded" type="button" data-bs-toggle="modal"
+                    data-bs-target="#addProductModal">
+                    Add Product
+                </button>
+            </div>
+        </form>
+    </div>
 
-                                <form action="" class="form-control border-0 d-flex bg-body-tertiary" method="post">
-                                    <select class="form-select rounded mb-3 mx-3" name="item-category" id="item-branch">
-                                        <option selected>-- Select Branch --</option>
-                                        <option value="sample">Sample Branch</option>
-                                    </select>
+    <!-- Product Table-->
+    <div class="card card shadow p-3 bg-body-tertiary rounded border-0">
+        <div class="input-group input-group-sm border-0 align-content-center">
+            <p class=" fw-bold border-start border-3 border-success px-4 mb-3 me-5 align-content-center">
+                Filter
+            </p>
 
-                                    <select class="form-select rounded mb-3 me-3" name="item-category" id="item-category">
-                                        <option selected>-- Select Category --</option>
-                                        <option value="sample">Sample Category</option>
-                                    </select>
+            <form action="" class="form-control border-0 d-flex bg-body-tertiary" method="post">
+                <?php
+                $categories = RequestSQL::getAllCategories();
+                $branches = RequestSQL::getAllBranches();
 
-                                    <select class="form-select rounded mb-3 me-3" name="item-category" id="item-status">
-                                        <option selected>-- Select Status --</option>
-                                        <option value="sample">Good</option>
-                                        <option value="sample">Critical</option>
-                                        <option value="sample">Out of Stock</option>
-                                    </select>
+                $sessionCategory = '';
+                $sessionBranch = '';
+                $sessionStatus = '';
+                $sessionArchived = '';
 
-                                    <button class="btn btn-secondary mb-3 rounded" type="submit">Search</button>
-                                </form>
-                                
-                            </div>
-                            
-                            <div id="table-data">
-                                <!-- Content displayed and handled dynamically ----->
-                            </div>
-                        </div>
+                if ($admin) {
+                    $sessionCategory = $admin['category'];
+                    $sessionBranch = $admin['branch'];
+                    $sessionStatus = $admin['status'];
+                    $sessionArchived = $admin['archived'];
+                }
+
+                $selectedCategory = isset($_POST['item-category']) ? $_POST['item-category'] : $sessionCategory;
+                $selectedBranch = isset($_POST['item-branch']) ? $_POST['item-branch'] : $sessionBranch;
+                $selectedStatus = isset($_POST['item-status']) ? $_POST['item-status'] : $sessionStatus;
+                $selectedArchived = isset($_POST['item-archived']) ? $_POST['item-archived'] : $sessionArchived;
+
+                function isSelected($option, $selectedValue)
+                {
+                    return $option === $selectedValue ? 'selected' : '';
+                }
+                ?>
+
+                <select class="form-select rounded mb-3 me-3" name="item-category" id="item-category">
+                    <option value="">-- Select Category --</option>
+                    <?php
+                    if ($categories) {
+                        while ($category = $categories->fetch_assoc()) {
+                            $categoryName = $category['category_name'];
+                            echo "<option value='{$categoryName}' " . isSelected($categoryName, $selectedCategory) . ">{$categoryName}</option>";
+                        }
+                    }
+                    ?>
+                </select>
+
+                <select class="form-select rounded mb-3 me-3" name="item-branch" id="item-branch">
+                    <option value="">-- Select Branches --</option>
+                    <?php
+                    if ($branches) {
+                        while ($branch = $branches->fetch_assoc()) {
+                            $branchName = $branch['branch_name'];
+                            echo "<option value='{$branchName}' " . isSelected($branchName, $selectedBranch) . ">{$branchName}</option>";
+                        }
+                    }
+                    ?>
+                </select>
+
+                <select class="form-select rounded mb-3 me-3" name="item-status" id="item-status">
+                    <option value="">-- Select Status --</option>
+                    <option value="good" <?php echo isSelected('good', $selectedStatus); ?>>Good</option>
+                    <option value="critical" <?php echo isSelected('critical', $selectedStatus); ?>>Critical</option>
+                    <option value="out-of-stock" <?php echo isSelected('out-of-stock', $selectedStatus); ?>>Out of Stock
+                    </option>
+                </select>
+
+                <select class="form-select rounded mb-3 me-3" name="item-archived" id="item-archived">
+                    <option value="narchived" <?php echo isSelected('narchived', $selectedArchived); ?>>
+                        Not Archived
+                    </option>
+                    <option value="archived" <?php echo isSelected('archived', $selectedArchived); ?>>
+                        Archived
+                    </option>
+                </select>
+
+                <button class="btn btn-secondary mb-3 rounded" type="submit">Search</button>
+            </form>
+
+        </div>
+
+        <div>
+            <?php
+            $data = RequestSQL::getAllProduct('admin-stock', $selectedCategory, $selectedStatus, $searchValue, $selectedArchived, $selectedBranch);
+            $result = $data['result'];
+            $currentPage = $data['page'];
+            $totalPages = $data['total'];
+            AdminClass::loadAllStock($result);
+            BranchClass::loadPaginator($currentPage, $totalPages, 'admin-stock-page');
+            ?>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProductModalLabel">Add New Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProductForm" method="POST" action="backend/redirector.php" enctype="multipart/form-data">
+                    <input type="hidden" name="type" value="admin-add-product">
+                    <div class="mb-3">
+                        <label for="productName" class="form-label">Product Name</label>
+                        <input type="text" class="form-control" id="productName" name="productName"
+                            placeholder="Enter product name" required>
                     </div>
-                </div>
+
+                    <?php $categories = RequestSQL::getAllCategories(); ?>
+                    <div class="mb-3">
+                        <label for="productCategory" class="form-label">Category</label>
+                        <select class="form-select" id="productCategory" name="productCategory" required
+                            onchange="toggleNewCategoryDiv()">
+                            <option value="">Select Category</option>
+                            <?php
+                            if ($categories) {
+                                while ($category = $categories->fetch_assoc()) {
+                                    $category_name = $category['category_name'];
+                                    echo "<option value='{$category_name}'>{$category_name}</option>";
+                                }
+                            }
+                            ?>
+                            <option value="newCategory">New Category</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="newCategoryDiv" style="display: none;">
+                        <label for="newCategoryName" class="form-label">New Category Name</label>
+                        <input type="text" class="form-control" id="newCategoryName" name="newCategoryName"
+                            placeholder="Enter new category name">
+                    </div>
+
+                    <?php $branches = RequestSQL::getAllBranches(); ?>
+                    <div class="mb-3">
+                        <label for="assignedBranch" class="form-label">Assigned Branch</label>
+                        <select class="form-select" id="assignedBranch" name="assignedBranch" required>
+                            <option value="" disabled selected>Select a branch</option>
+                            <?php
+                            if ($branches) {
+                                while ($branch = $branches->fetch_assoc()) {
+                                    $branch_id = $branch['id'];
+                                    $branchName = $branch['branch_name'];
+                                    echo "<option value='{$branch_id}'>{$branchName}</option>";
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="productStock" class="form-label">Stock</label>
+                        <input type="number" class="form-control" id="productStock" name="productStock"
+                            placeholder="Enter stock quantity" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="productPrice" class="form-label">Price</label>
+                        <input type="number" step="0.01" class="form-control" id="productPrice" name="productPrice"
+                            placeholder="Enter price" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="productImage" class="form-label">Product Image</label>
+                        <input class="form-control" type="file" id="productImage" name="productImage" accept="image/*"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="productQRCode" class="form-label">Product QR Code</label>
+                        <input type="text" class="form-control" id="productQRCode" name="productQRCode"
+                            placeholder="Scan QR code" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-secondary rounded" form="addProductForm">Add Product</button>
             </div>
         </div>
-    </section>
+    </div>
+</div>
 
-<!-- Footer ---------------------------------------------------------------------------------------------------------------->
+<script>
+    const productQRCodeInput = document.getElementById('productQRCode');
 
-    <footer class="text-center pt-2 custom-admin-footer">
-        <div class="container d-flex justify-content-between">
-            <div class="d-flex align-content-center">
-                <img src="../img/LyzaVectorLogoWhite.png" class="img rounded me-4" alt="Lyza Drugmart" width="30" height="30">
-                <p class="text-white p-1"><small>Copyright © 2024 Lyza Drugmart. All Rights Reserved.</small></p>
-            </div>
-            <div class="d-flex p-1">
-                <!----- Dashboard ----->
-                <a class="link-offset-2 link-underline link-underline-opacity-0 ps-4" href="admin.php" id="dashboard-tab">
-                    <p class="text-white">Dashboard</p>
-                </a> 
-                <!----- Transactions ----->
-                <a class="link-offset-2 link-underline link-underline-opacity-0 ps-4" href="admin_transaction_reports.php" id="transactions-tab">
-                    <p class="text-white">Transactions</p>
-                </a>
-                <!----- Stock History ----->
-                <a class="link-offset-2 link-underline link-underline-opacity-0 ps-4" href="admin_stock_reports.php" id="stocks-tab">
-                    <p class="text-white">Stock</p>
-                </a>
-                <!----- Product Status ----->
-                <a class="link-offset-2 link-underline link-underline-opacity-0 ps-4" href="admin_product_reports.php" id="products-tab">
-                    <p class="text-white">Products</p>
-                </a>
-                <!----- Accounts ----->
-                <a class="link-offset-2 link-underline link-underline-opacity-0 ps-4"  href="admin_accounts.php" id="accounts-tab">
-                    <p class="text-white">Accounts</p>
-                </a>
-            </div>
-        </div>
-    </footer>
+    // DETECT THE QR CODE (TEST NIO NALANG)
+    productQRCodeInput.addEventListener('input', function (event) {
+        const scannedData = event.target.value;
+        // alert("Scanned QR Code Data:", scannedData);
+        productQRCodeInput.value = scannedData;
+    });
+</script>
 
-    <script src="js/report/product_pagination.js"></script>
+<script>
+    function toggleNewCategoryDiv() {
+        const newCategoryDiv = document.getElementById("newCategoryDiv");
+        const selectedCategory = document.getElementById("productCategory").value;
 
-<?php include "admin_footer.php"; ?>
-
+        if (selectedCategory === "newCategory") {
+            newCategoryDiv.style.display = "block";
+        } else {
+            newCategoryDiv.style.display = "none";
+        }
+    }
+    function confirmArchive(check) {
+        let confirmation = "None";
+        if (check == "Archived")
+            confirmation = confirm("Are you sure you want to archived this product?");
+        else
+            confirmation = confirm("Are you sure you want to unarchived this product?");
+        return confirmation;
+    }
+</script>

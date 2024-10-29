@@ -1,124 +1,177 @@
-<?php 
-    include_once "includes/dbh.inc.php"; 
-    include "index_header.php";
-    include "index_navigation.php";
+<?php
+session_start();
+require_once "backend/request.php";
+require_once "backend/functions.php";
+
+$_SESSION['account'] = null;
+unset($_SESSION['account']);
+
+include "client/client_header.php";
+include "client/client_navigation.php";
+
+require_once("modals/modals.php");
+if (isset($_SESSION['success-message'])) {
+    echo "<script>showSuccessModal('{$_SESSION['success-message']}');</script>";
+    unset($_SESSION['success-message']);
+} elseif (isset($_SESSION['error-message'])) {
+    echo "<script>showErrorModal('{$_SESSION['error-message']}');</script>";
+    unset($_SESSION['error-message']);
+}
 ?>
 
 <section class="overflow-y-scroll">
 
-<!-- Banner ------------------------------------------------------------------------------------------------------------>
-
-    <div class="banner-home">
+    <!-- Banner ------------------------------------------------------------------------------------------------------------>
+    <div class="banner-home mb-5">
         <img src="img/SamplePhoto.jpg">
         <div class="container banner-text mt-3">
 
             <!----- Banner Title/Label ----->
-            <div class="my-5">
-                <h2 class="fw-bold display-4 text-center">Lyza Drugmart</h2>
-                <p class="text-light text-center">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-            </div>
+            <div class="mt-5">
+                <h2 class="fw-bold display-2 py-4">Lyza Drugmart</h2>
+                <p class="text-white me-5" style="max-width: 430px;">
+                    Lyza Drugmart, your trusted local pharmacy in <strong>Sto. Tomas, Batangas,</strong> offers
+                    affordable branded and generic pharmaceutical products to meet the community's healthcare needs.
+                </p>
+                <h5>
+                    <span class="badge custom-btn-success p-2 fw-light ">
+                        <i class="bi bi-clock-fill"></i>&nbsp;8:00 AM - 8:00 PM
+                    </span>&nbsp;
 
-            <!----- Search Bar ----->
-            <div class="card shadow p-0 bg-body-tertiary rounded-pill border-0">
-                <div class="input-group input-group-lg rounded-pill border-0">
-                    <input type="text" id="search-input" class="form-control rounded-start-pill display-5" placeholder="Search..." aria-describedby="search-button-home">
-                    <button class="btn rounded-end-circle custom-btn-success" type="button" id="search-button-home">
-                        <i class="bi bi-search"></i>
-                    </button>
-                </div>
+                    <span class="badge custom-btn-success p-2 fw-light">
+                        <i class="bi bi-geo-alt-fill"></i>&nbsp;Visit Us
+                    </span>
+                </h5>
             </div>
+        </div>
 
-        </div>            
+    </div>
     </div>
 
-<!-- Content ------------------------------------------------------------------------------------------------------------>
+    <!-- Content ------------------------------------------------------------------------------------------------------------>
 
-    <div class="container">
+    <div class="container mt-0">
 
+        <!----- Product Categories ----->
+        <h2 class=" fw-bold fs-3 border-start border-3 border-success px-4 mb-5 mt-0">
+            Discover our Branches
+        </h2>
+
+        <!----- Branches ----->
+        <div class="row mb-5">
+            <?php
+            $branches = RequestSQL::getAllBranches();
+            if ($branches->num_rows != 0) {
+                foreach ($branches as $branch) {
+                    ?>
+            <div class="col-sm-6">
+                <div class="card shadow bg-body-tertiary rounded border-0 custom-card-branch mb-3"
+                    style="min-width: 410px; background-image: url('img/<?php echo $branch['branchImg'] ?>')">
+                    <div class="custom-branch-text d-flex">
+                        <div class="align-content-end px-4 pb-2">
+                            <span class="badge bg-white text-success">Lyza Drugmart</span>
+                            <h4 class="fw-bold fs-1 text-white">
+                                <?php echo $branch['branch_name'] ?>
+                            </h4>
+                        </div>
+                        <div class="flex-fill align-content-end pb-2 pe-2">
+                            <?php BranchClass::loadBranchDesign($branch); ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php
+                }
+            }
+            ?>
+        </div>
         <!----- Product Categories ----->
         <h2 class=" fw-bold fs-3 border-start border-3 border-success px-4">
             Explore our Available Products
         </h2>
-        <ul class="nav nav-pills mb-3 custom-pills">     
-            <li class="nav-item">
-                <a class="nav-link category-pill active" data-category="All">All</a>
+
+        <!----- Search Bar ----->
+        <form method="post">
+            <?php
+            $client = RequestSQL::getSession('client');
+            $sessionSearch = '';
+            if ($client)
+                $sessionSearch = $client['search'];
+
+            $searchValue = isset($_POST['search-value']) ? $_POST['search-value'] : $sessionSearch;
+            ?>
+
+            <div class="input-group input-group-lg rounded-pill border-0 mt-5 mb-2">
+                <input type="text" id="search-input" class="form-control rounded-start-pill display-5"
+                    name='search-value' placeholder="Search Product..." aria-describedby="search-button-home"
+                    value="<?php echo $searchValue ?>">
+                <button class="btn rounded-end-circle custom-btn-success" type="submit" id="search-button-home">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </form>
+        <ul class="nav nav-pills mb-3 custom-pills">
+            <?php
+            $categories = RequestSQL::getAllCategories();
+            $selectedCategory = isset($_GET['category']) ? $_GET['category'] : null;
+
+            $isActive = $selectedCategory ? '' : 'active';
+            echo "
+            <li class='nav-item'>
+                <a class='nav-link $isActive' href='index.php'>All</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link category-pill" data-category="Medicine">Medicine</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link category-pill" data-category="Supplement">Supplement</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link category-pill" data-category="Hygiene">Hygiene</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link category-pill" data-category="Contraceptive">Contraceptive</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link category-pill" data-category="Baby Care">Baby Care</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link category-pill" data-category="Other">Other</a>
-            </li>
+            ";
+
+            if ($categories->num_rows != 0) {
+                foreach ($categories as $category) {
+                    $isActive = $selectedCategory === $category['category_name'] ? 'active' : '';
+                    echo "
+                    <li class='nav-item'>
+                        <a class='nav-link $isActive' href='index.php?category={$category['category_name']}'>{$category['category_name']}</a>
+                    </li>
+                    ";
+                }
+            }
+            ?>
         </ul>
 
         <!----- Product Grid Display ----->
-        <div class="row g-3 mb-3" id="product-grid">
-
-            <!-- Cards will be dynamically inserted here after Category Click -->
-
+        <div class="row g-3 mb-5" id="product-grid">
             <?php
+            $product = RequestSQL::getAllProduct('client', $selectedCategory, null, $searchValue, null, null, null)['result'];
 
-            $query = "SELECT * FROM products";
-            $result = mysqli_query($dbconn,$query);
+            while ($row = $product->fetch_assoc()): ?>
+            <div class="col-md-3">
 
-            while ($row = $result->fetch_assoc()): ?>
-                <div class="col-md-3">
+                <div class="card shadow bg-body-tertiary rounded border-0">
 
-                    <!----- Product Display Placeholder for Initial Page Loading ----->
-                    <div class="card shadow bg-body-tertiary rounded border-0">
+                    <img class="card-image rounded" src="img/<?php echo $row['productImage']; ?>" height="250"
+                        width="auto" alt="<?php echo $row['productName']; ?>">
 
-                        <img class="card-image rounded" src="img/<?php echo $row['image_path']; ?>" height="250" width="auto" alt="<?php echo $row['product_name']; ?>">
-
-                        <div class="card-body">
-                            <span class="badge text-bg-secondary p-1 mb-1"><?php echo $row['category']; ?></span>
-                            <p class="m-0"><?php echo $row['product_name']; ?></p>
-                            <div class="d-flex justify-content-between">
-                                <p class="fw-bold m-0">₱<?php echo $row['price']; ?></p>
-                                <p class="m-0"><?php echo $row['stock']; ?> item/s</p>
-                            </div>
+                    <div class="card-body">
+                        <span class="badge text-bg-secondary p-1 mb-1">
+                            <?php echo $row['productCategory']; ?>
+                        </span>
+                        <p class="m-0">
+                            <?php echo $row['productName']; ?>
+                        </p>
+                        <div class="d-flex justify-content-between">
+                            <p class="fw-bold m-0">₱
+                                <?php echo $row['productPrice']; ?>
+                            </p>
+                            <p class="m-0">
+                                <?php echo $row['productStock']; ?> item/s
+                            </p>
                         </div>
-                    </div>                                        
+                    </div>
                 </div>
-            <?php endwhile;
-            ?>
+            </div>
+
+            <?php endwhile; ?>
         </div>
     </div>
 
 </section>
 
 <!-- Banner-Foot --------------------------------------------------------------------------------------------------------->
-
-    <footer class="banner-foot pt-2">
-        <div class="container d-flex justify-content-between">
-            <div class="d-flex align-content-center">
-                <img src="img/LyzaVectorLogoWhite.png" class="img rounded me-4" alt="Lyza Drugmart" width="30" height="30">
-                <p class="text-white p-1"><small>Copyright © 2024 Lyza Drugmart. All Rights Reserved.</small></p>
-            </div>
-             
-            <div class="d-flex p-1">
-                <p class="text-white">
-                    <small>
-                        Contact us at <span class="badge m-0 text-bg-light text-success">09XX-XXX-XXXX</span>
-                    </small>
-                </p>&nbsp;
-                <i class="bi bi-facebook text-white"></i>&nbsp;
-                <i class="bi bi-instagram text-white"></i>
-            </div> 
-        </div>           
-    </footer>
-
-<?php include "index_footer.php"; ?>
-
-    
+<?php include "client/client_footer.php"; ?>

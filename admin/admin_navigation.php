@@ -15,16 +15,15 @@
         <div class="container">
             <div class="d-inline-flex align-items-center custom-logo-label">
                 <img class="me-2 p-0" src="../img/LyzaVectorLogo.png" alt="Lyza Drugmart" width="35" height="30">
-                        
+
             </div>
-            
+
             <h2 class=" fw-bold fs-4">Lyza Drugmart</h2>
 
             <!----- Log Out ----->
-            <button class="btn btn-secondary p-2" type="button" >
+            <a class="btn btn-secondary p-2" type="button" href="index.php">
                 <small><i class="bi bi-box-arrow-right"></i>&nbsp;LOG OUT </small>
-            </button>
+            </a>
         </div>
     </nav>
 </header>
-    
