@@ -7,13 +7,13 @@ SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
 
 CREATE TABLE branch (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    branchImg VARCHAR(100) NOT NULL,
+    branchImg VARCHAR(100) DEFAULT "",
     branchName VARCHAR(100) NOT NULL,
-    coordinates VARCHAR(50),
-    addressLine VARCHAR(255),
-    city VARCHAR(100),  
-    province VARCHAR(100), 
-    operatingHours VARCHAR(50),
+    coordinates VARCHAR(50) DEFAULT "NONE",
+    addressLine VARCHAR(255) DEFAULT "",
+    city VARCHAR(100) DEFAULT "", 
+    province VARCHAR(100) DEFAULT "", 
+    operatingHours VARCHAR(50) DEFAULT "",
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
