@@ -1,3 +1,7 @@
+<?php
+$currentUrl = $_SERVER['REQUEST_URI'];
+$_SESSION['current_url'] = $currentUrl;
+?>
 <!-- Item Browser -->
 <div class="content ms-3 flex-fill content-section active" id="pos">
 
@@ -36,67 +40,60 @@
 
     <div class="card card shadow p-3 bg-body-tertiary rounded border-0">
         <div class="input-group input-group-sm border-0 align-content-center">
-            <?php if (RequestSQL::getSession('online')) { ?>
-                <p class=" fw-bold border-start border-3 border-success px-4 me-5 align-content-center">
-                    Products
-                </p>
-            <?php } ?>
-            <form action="" class="form-control border-0 d-flex bg-body-tertiary" method="post">
-                <?php if (RequestSQL::getSession('online')) { ?>
-                    <?php
-                    $categories = RequestSQL::getAllCategories();
-                    $sessionCategory = '';
-                    if ($branch)
-                        $sessionCategory = $branch['category'];
-                    $selectedCategory = isset($_POST['item-category']) ? $_POST['item-category'] : $sessionCategory;
 
-                    function isSelected($option, $selectedValue)
-                    {
-                        return $option === $selectedValue ? 'selected' : '';
-                    }
-                    ?>
+            <p class=" fw-bold border-start border-3 border-success px-4 me-5 align-content-center">
+                Products
+            </p>
 
-                    <select class="form-select rounded mb-3 me-3" name="item-category" id="item-category">
-                        <option value="">-- Select Category --</option>
-                        <?php
-                        if ($categories) {
-                            while ($category = $categories->fetch_assoc()) {
-                                $categoryName = $category['category_name'];
-                                echo "<option value='{$categoryName}' " . isSelected($categoryName, $selectedCategory) . ">{$categoryName}</option>";
-                            }
-                        }
-                        ?>
-                    </select>
-                    <button class="btn btn-secondary mb-3 rounded" type="submit">Search</button>
-                <?php } ?>
-            </form>
         </div>
 
-        <?php if (RequestSQL::getSession('online')) { ?>
-            <div>
+        <div>
+            <!-- Major Change: 
+                Please include expiry dates in dynamic table
+            -->
+            <?php
+            RequestSQL::getAllProductForCache(RequestSQL::getSession('account')['branchName']);
+            $data = RequestSQL::getAllProduct(
+                'branch-pos',
+                null,
+                null,
+                $searchValue,
+                null,
+                RequestSQL::getSession('account')['branchName']
+            );
+            $products = $data['result'];
+            $currentPage = $data['page'];
+            $totalPages = $data['total'];
+            BranchClass::loadAllPosProduct($products);
+            ?>
+            <div class="d-flex justify-content-between">
                 <?php
-                $data = RequestSQL::getAllProduct('branch-pos', $selectedCategory, null, $searchValue, null, 'Main Branch');
-                $products = $data['result'];
-                $currentPage = $data['page'];
-                $totalPages = $data['total'];
-                BranchClass::loadAllPosProduct($products);
                 BranchClass::loadPaginator($currentPage, $totalPages, 'branch-pos-page');
                 ?>
+            </div>
+        </div>
 
-            </div>
-        <?php } else { ?>
-            <div class="mb-3">
-                <label for="productName" class="form-label">Product Name</label>
-                <input type="text" class="form-control" id="productName" name="productName" placeholder="Enter product name"
-                    required>
-            </div>
-            <div class="mb-3">
+        <!-- This panel is an emergency panel when a product exist but cannot recognized by the system -->
+        <!-- <div class="mb-3">
+            <label for="productName" class="form-label">Product Name</label>
+            <input type="text" class="form-control" id="productName" name="productName" placeholder="Enter product name"
+                required>
+        </div>
+        <div class="d-flex">
+            <div class="mb-3 flex-fill">
                 <label for="productPrice" class="form-label">Product Price</label>
                 <input type="number" class="form-control" id="productPrice" name="productPrice"
-                    placeholder="Enter product price" required>
+                    placeholder="Enter Product Price" required>
             </div>
-            <button class='btn btn-secondary mb-3 rounded' type='submit'>Add Product</button>
-        <?php } ?>
+            <div class="ms-3 mb-3 flex-fill">
+                <label for="productPrice" class="form-label">Expiry Date</label>
+                <input type="number" class="form-control" id="productPrice" name="productPrice"
+                    placeholder="Enter Expiry Date" required>
+            </div>
+        </div>
+        <button class='btn btn-secondary mb-3 rounded' type='submit'>Add Product</button> -->
+
+
     </div>
 </div>
 
@@ -107,6 +104,7 @@
         <p class=" fw-bold border-start border-3 border-success px-4 me-5 mb-0">
             Item Cart
         </p>
+
         <?php
         if (isset($_POST['reset-cart']))
             RequestSQL::setSession('branch-cart-product', []);
@@ -131,6 +129,7 @@
                 </th>
             </tr>
 
+
             <?php $branchProducts = RequestSQL::getSession('branch-cart-product'); ?>
             <?php if ($branchProducts): ?>
                 <?php foreach ($branchProducts as $branchProd): ?>
@@ -145,6 +144,8 @@
                                     value="<?php echo htmlspecialchars($branchProd['product_id']); ?>">
                                 <input type="hidden" name="branch_id"
                                     value="<?php echo htmlspecialchars($branchProd['branch_id']); ?>">
+                                <input type="hidden" name="productBarcode"
+                                    value="<?php echo htmlspecialchars($branchProd['product_barcode']); ?>">
                                 <input type="hidden" name="product_name"
                                     value="<?php echo htmlspecialchars($branchProd['product_name']); ?>">
                                 <input type="hidden" name="product_price"
@@ -166,6 +167,7 @@
                 <?php endforeach; ?>
             <?php endif; ?>
 
+
         </table>
     </div>
 
@@ -186,9 +188,9 @@
         </div>
 
         <div class="input-group align-content-center">
-            <label class="form-label text-muted me-5 ps-2 py-0" for="cash-input">Cash Received:</label>
-            <span class="input-group-text">₱</span>
-            <input class="form-control rounded p-0 mb-2 text-end" placeholder="00.00" id="cash-input">
+            <label class="form-label text-muted me-5 ps-2 pt-2 " for="cash-input">Cash Received:</label>
+            <span class="input-group-text border-0">₱</span>
+            <input class="form-control rounded pt-2 mb-2 text-end" placeholder="00.00" id="cash-input">
         </div>
 
         <div class="d-flex justify-content-between">
@@ -196,40 +198,28 @@
             <span id="change-display" class="text-muted text-end pe-2 mb-3">₱ 00.00</span>
         </div>
 
-        <div class="justify-content-center">
-            <div class="btn-group">
-                <button class="btn shadow rounded border-0 custom-calc-btn" onclick="appendToInput(7)"> <span
-                        class="fs-5">7</span> </button>
-                <button class="btn shadow rounded border-0 custom-calc-btn" onclick="appendToInput(8)"> <span
-                        class="fs-5">8</span> </button>
-                <button class="btn shadow rounded border-0 custom-calc-btn" onclick="appendToInput(9)"> <span
-                        class="fs-5">9</span> </button>
+        <div class="d-flex justify-content-between">
+            <span class="text-muted ps-2">Discounted Total:</span>
+            <span id="discounted-total" class="text-muted text-end pe-2 mb-3">₱ 00.00</span>
+        </div>
+
+        <div class="p-3 bg-body-secondary rounded-4">
+            <!-- Senior Citizen Discount (20% less per item) -->
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="seniorDiscount">
+                <label class="form-check-label" for="seniorDiscount">
+                    Senior Citizen Discount
+                </label>
             </div>
-            <div class="btn-group">
-                <button class="btn shadow rounded border-0 custom-calc-btn" onclick="appendToInput(4)"> <span
-                        class="fs-5">4</span> </button>
-                <button class="btn shadow rounded border-0 custom-calc-btn" onclick="appendToInput(5)"> <span
-                        class="fs-5">5</span> </button>
-                <button class="btn shadow rounded border-0 custom-calc-btn" onclick="appendToInput(6)"> <span
-                        class="fs-5">6</span> </button>
-            </div>
-            <div class="btn-group">
-                <button class="btn shadow rounded border-0 custom-calc-btn" onclick="appendToInput(1)"> <span
-                        class="fs-5">1</span> </button>
-                <button class="btn shadow rounded border-0 custom-calc-btn" onclick="appendToInput(2)"> <span
-                        class="fs-5">2</span> </button>
-                <button class="btn shadow rounded border-0 custom-calc-btn" onclick="appendToInput(3)"> <span
-                        class="fs-5">3</span> </button>
-            </div>
-            <div class="btn-group">
-                <button class="btn shadow rounded border-0 custom-calc-btn" onclick="appendToInput('.')"> <span
-                        class="fs-5">.</span> </button>
-                <button class="btn shadow rounded border-0 custom-calc-btn" onclick="appendToInput(0)"> <span
-                        class="fs-5">0</span> </button>
-                <button class="btn shadow rounded border-0 custom-calc-btn" onclick="clearInput()"> <span
-                        class="fs-5">Del</span> </button>
+            <!-- PWD Discount (20% less per item) -->
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="pwdDiscount">
+                <label class="form-check-label" for="pwdDiscount">
+                    Person with Disability Discount
+                </label>
             </div>
         </div>
+
 
         <div class="justify-content-center d-flex mt-3">
             <form method="POST" action="backend/redirector.php" onsubmit="return validateTransaction()">
@@ -237,7 +227,9 @@
                 <input type="hidden" id="total-input" name="total" value="0">
                 <input type="hidden" id="received-input" name="received" value="0">
                 <input type="hidden" id="change-input" name="change" value="0">
-                <button class="btn flex-fill rounded border-1 custom-receipt-btn p-2 fs-4" type="submit">Save
+                <input type="hidden" id="is-senior" name="is-senior" value="0">
+                <input type="hidden" id="is-pwd" name="is-pwd" value="0">
+                <button class="btn flex-fill rounded border-1 custom-receipt-btn py-2 fs-4 px-5" type="submit">Save
                     Order</button>
             </form>
         </div>
@@ -255,19 +247,6 @@
 </div>
 
 
-
-<?php
-if (RequestSQL::hasSession('success-message')) {
-    echo '<div class="alert alert-success fixed-alert" id="message-alert" role="alert">' . htmlspecialchars(RequestSQL::getSession('success-message')) . '</div>';
-    RequestSQL::unsetSession('success-message');
-}
-
-if (RequestSQL::hasSession('error-message')) {
-    echo '<div class="alert alert-danger fixed-alert" id="message-alert" role="alert">' . htmlspecialchars(RequestSQL::getSession('error-message')) . '</div>';
-    RequestSQL::unsetSession('error-message');
-}
-?>
-
 <script>
     document.addEventListener('input', function () {
         // alert('DETECT');
@@ -282,28 +261,82 @@ if (RequestSQL::hasSession('error-message')) {
     });
 
     function updateHiddenInputs() {
-        const totalAmount = parseFloat(document.getElementById('total-amount').innerText.replace(/[₱\s,]/g, '')) || 0;
-        const cashReceived = parseFloat(document.getElementById('cash-input').value) || 0;
-        const change = cashReceived - totalAmount;
 
+        const originalTotalAmount = parseFloat(document.getElementById('total-amount').innerText.replace(/[₱\s,]/g, '')) || 0;
+        const cashReceived = parseFloat(document.getElementById('cash-input').value) || 0;
+        const seniorDiscount = document.getElementById('seniorDiscount').checked;
+        const pwdDiscount = document.getElementById('pwdDiscount').checked;
+
+        const seniorDiscountRate = 0.20;
+        const pwdDiscountRate = 0.20;
+
+        let totalAmount = originalTotalAmount;
+        let discountedTotal = 0;
+        if (seniorDiscount) {
+            totalAmount -= originalTotalAmount * seniorDiscountRate;
+            discountedTotal += originalTotalAmount * seniorDiscountRate;
+        }
+        if (pwdDiscount) {
+            totalAmount -= originalTotalAmount * pwdDiscountRate;
+            discountedTotal += originalTotalAmount * pwdDiscountRate;
+        }
+
+        const change = cashReceived - totalAmount;
         document.getElementById('total-input').value = totalAmount.toFixed(2);
         document.getElementById('received-input').value = cashReceived.toFixed(2);
         document.getElementById('change-input').value = change.toFixed(2);
+        document.getElementById('is-pwd').value = pwdDiscount ? "1" : "0";
+        document.getElementById('is-senior').value = seniorDiscount ? "1" : '0';
     }
 
+    document.getElementById('cash-input').addEventListener('input', calculateChange);
+    document.getElementById('seniorDiscount').addEventListener('change', calculateChange);
+    document.getElementById('pwdDiscount').addEventListener('change', calculateChange);
+
     function calculateChange() {
+
         const cashReceived = parseFloat(document.getElementById('cash-input').value) || 0;
-        const totalAmount = parseFloat(document.getElementById('total-amount').innerText) || 0;
+        const originalTotalAmount = parseFloat(document.getElementById('total-amount').innerText) || 0;
+        const seniorDiscount = document.getElementById('seniorDiscount').checked;
+        const pwdDiscount = document.getElementById('pwdDiscount').checked;
+
+        const seniorDiscountRate = 0.20;
+        const pwdDiscountRate = 0.20;
+
+
+
+        let totalAmount = originalTotalAmount;
+        let discountedTotal = 0;
+        if (seniorDiscount) {
+            totalAmount -= originalTotalAmount * seniorDiscountRate;
+            discountedTotal += originalTotalAmount * seniorDiscountRate;
+        }
+        if (pwdDiscount) {
+            totalAmount -= originalTotalAmount * pwdDiscountRate;
+            discountedTotal += originalTotalAmount * pwdDiscountRate;
+        }
+
         const change = cashReceived - totalAmount;
+
         document.getElementById('change-display').innerText = '₱ ' + change.toFixed(2);
+        document.getElementById('discounted-total').innerText = '₱ ' + discountedTotal.toFixed(2);
         updateHiddenInputs();
     }
 
-    function appendToInput(value) {
-        const input = document.getElementById('cash-input');
-        input.value += value;
-        calculateChange();
-    }
+    // function calculateChange() {
+    //     const cashReceived = parseFloat(document.getElementById('cash-input').value) || 0;
+    //     const totalAmount = parseFloat(document.getElementById('total-amount').innerText) || 0;
+
+    //     const change = cashReceived - totalAmount;
+    //     document.getElementById('change-display').innerText = '₱ ' + change.toFixed(2);
+    //     updateHiddenInputs();
+    // }
+
+    // function appendToInput(value) {
+    //     const input = document.getElementById('cash-input');
+    //     input.value += value;
+    //     calculateChange();
+    // }
 
     function clearInput() {
         document.getElementById('cash-input').value = '';

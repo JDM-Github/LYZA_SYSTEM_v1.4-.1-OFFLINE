@@ -1,0 +1,26 @@
+{
+    "staff1@example.com": {
+        "id": 2,
+        "userName": "staff1",
+        "firstName": "staff1",
+        "lastName": "staff",
+        "email": "staff1@example.com",
+        "password": "$2y$10$WtywAnJW3oAlm9dBZbZQBu2mKdC3j954MKt9Y7i6xYFFu3hqJO96C",
+        "isAdmin": 0,
+        "assignedBranch": 2,
+        "branchName": "San Miguel",
+        "userStatus": "active"
+    },
+    "admin@example.com": {
+        "id": 1,
+        "userName": "ADMIN",
+        "firstName": "admin",
+        "lastName": "admin",
+        "email": "admin@example.com",
+        "password": "$2y$10$VnUCxQRuvOAiJguPQhsBGOLkHd7v7E05Ko4wZIgI1TgNlvFGEhqNK",
+        "isAdmin": 1,
+        "assignedBranch": 1,
+        "branchName": "All Branch",
+        "userStatus": "active"
+    }
+}

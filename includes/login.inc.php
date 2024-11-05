@@ -3,7 +3,7 @@
 <center><small><span class="text-muted">Are you a Staff?</span></small></center>
 <h1 class="fs-2 fw-bolder px-2 text-center" style="color: var(--green);">Please, Log In.</h1>
 
-<form class="form-control border-0" action="backend/redirector.php" method="post">
+<form class="form-control border-0" action="../backend/redirector.php" method="post">
     <input type="hidden" name="type" value="client-login">
     <!----- Email Input ----->
     <div class="form-floating mb-2">
@@ -17,12 +17,21 @@
         <label for="pass" id="pass-label"><em>Password</em></label>
     </div>
 
-    <div class="form-check mb-3">
-        <input class="form-check-input" type="checkbox" value="" id="show-password" onclick="togglePassword()">
-        <label class="form-check-label text-muted" for="show-password">
-            Show Password
-        </label>
+    <div class="d-flex">
+        <!----- See Password ----->
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" value="" id="show-password" onclick="togglePassword()">
+            <label class="form-check-label text-muted" for="show-password">
+                Show Password
+            </label>
+        </div>
+
+        <!----- Forgot Password ----->
+        <div>
+
+        </div>
     </div>
+
 
     <div class="d-grid">
         <button class="btn custom-btn-success" name="login" type="submit">LOGIN</button>

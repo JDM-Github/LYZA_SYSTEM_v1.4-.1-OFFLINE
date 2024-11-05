@@ -23,8 +23,8 @@
                         <i class="bi bi-search"></i>
                     </button>
 
-                    <button class="btn btn-secondary mb-3 rounded me-3" type="button" data-bs-toggle="modal"
-                        data-bs-target="#createBranchModal">Add Branch</button>
+                    <!-- <button class="btn btn-secondary mb-3 rounded me-3" type="button" data-bs-toggle="modal"
+                        data-bs-target="#createBranchModal">Add Branch</button> -->
                     <button class="btn btn-secondary mb-3 rounded" type="button" data-bs-toggle="modal"
                         data-bs-target="#addAccountModal">Add Account</button>
                 </div>
@@ -84,6 +84,9 @@
             </div>
 
             <div>
+                <!-- Major Change: 
+                    Please include "Change Password Privilege for the admin for staff accounts"
+                -->
                 <?php
                 $data = RequestSQL::getAdminStaff($selectedBranch, $selectedStatus, $searchValue);
                 $account = $data['result'];
@@ -130,14 +133,7 @@
                         <label for="password" class="form-label">Password</label>
                         <input type="text" class="form-control" id="password" name="password" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="userStatus" class="form-label">User Status</label>
-                        <select class="form-select" id="userStatus" name="userStatus" required>
-                            <option value="active">Active</option>
-                            <option value="disabled">Disabled</option>
-                            <option value="removed">Removed</option>
-                        </select>
-                    </div>
+
                     <?php $branches = RequestSQL::getAllBranches(); ?>
                     <div class="mb-3">
                         <label for="assignedBranch" class="form-label">Assigned Branch</label>
@@ -155,13 +151,6 @@
                         </select>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="isAdmin" class="form-label">Is Admin?</label>
-                        <select class="form-select" id="isAdmin" name="isAdmin" required>
-                            <option value="false">No</option>
-                            <option value="true">Yes</option>
-                        </select>
-                    </div>
                 </form>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>

@@ -14,6 +14,21 @@ class MySQLDatabase
 		$this->close_connection();
 	}
 
+	public function beginTransaction()
+	{
+		$this->connection->begin_transaction();
+	}
+
+	public function commit()
+	{
+		$this->connection->commit();
+	}
+
+	public function rollback()
+	{
+		$this->connection->rollback();
+	}
+
 	public function escape($value)
 	{
 		return mysqli_real_escape_string($this->connection, $value);

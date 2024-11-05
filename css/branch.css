@@ -1,22 +1,30 @@
+/*======== Globals =======================*/
+
 :root {
 	--green: #56ab91;
 	--red: #ee6055;
 	--base: #f2f2f2;
 	--dark: #6c757d;
 }
+
 body {
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
 	font-family: "Montserrat", sans-serif;
 	background-color: var(--base);
-	height: 80dvh;
+	height: 100dvh;
 	overflow: hidden;
 	display: grid;
 	grid-template-rows: auto 1fr auto;
 }
+
 section {
-	min-height: 80dvh;
+	min-height: 77dvh;
+}
+
+html {
+	font-size: 0.70rem;
 }
 
 /*---------- Banner-Foot ----------*/
@@ -140,4 +148,73 @@ section {
 /*---------- Footer ----------*/
 footer {
 	display: grid;
+}
+
+/*=== Custom Global Buttons ================*/
+
+.custom-btn-success {
+	background-color: var(--green);
+	color: var(--base);
+	border: 0;
+}
+
+.custom-btn-success:hover {
+	color: var(--green);
+	background-color: var(--base);
+	font-weight: bold;
+	border: 0;
+}
+
+.custom-btn-danger {
+	background-color: var(--red);
+	color: var(--base);
+	border: 0;
+}
+
+.custom-btn-danger:hover {
+	color: var(--red);
+	background-color: var(--base);
+	font-weight: bold;
+	border: 0;
+}
+
+.custom-btn-secondary {
+	background-color: var(--dark);
+	color: var(--base);
+	border: 0;
+}
+
+.custom-btn-secondary:hover {
+	color: var(--dark);
+	background-color: var(--base);
+	font-weight: bold;
+	border: 0;
+}
+
+.custom-btn-white {
+	background-color: var(--base);
+	color: var(--green);
+	border: 0;
+}
+
+.custom-btn-white:hover {
+	color: var(--base);
+	background-color: var(--dark);
+	font-weight: bold;
+	border: 0;
+}
+
+.custom-btn-border {
+	background-color: var(--base);
+	color: var(--green);
+	border: 1px;
+	border-color: var(--green);
+}
+
+.custom-btn-border:hover {
+	color: var(--base);
+	background-color: var(--green);
+	font-weight: bold;
+	border: 1px;
+	border-color: var(--green);
 }

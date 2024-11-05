@@ -5,9 +5,11 @@
             showToast("errorToast");
             return;
         }
+
         const printContainer = document.createElement('div');
         printContainer.style.display = 'none';
         document.body.appendChild(printContainer);
+
         printContainer.innerHTML = `
         <html>
             <head>
@@ -19,7 +21,7 @@
                 </style>
             </head>
             <body>
-                <h1>Stock History (${<?php echo strtoupper(json_encode($selectedGroup)); ?>})</h1>
+                <h1>Stock History</h1>
                 <table class="custom-table">
                     <thead>
                         <tr>

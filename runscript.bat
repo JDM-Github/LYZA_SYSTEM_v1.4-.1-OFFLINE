@@ -1,1 +1,0 @@
-mysql --user=root --password=admin < test.sql

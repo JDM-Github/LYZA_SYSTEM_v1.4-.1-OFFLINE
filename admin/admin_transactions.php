@@ -8,7 +8,7 @@
                     Transactions Report
                 </p>
 
-                <button class="btn btn-secondary m-1 mb-3 rounded" type="button" data-bs-toggle="modal"
+                <button class="btn custom-btn-secondary m-1 mb-3 rounded" type="button" data-bs-toggle="modal"
                     data-bs-target="#uploadTransaction">
                     Upload Transaction
                 </button>
@@ -45,7 +45,7 @@
                 $selectedOrder = isset($_POST['order-by']) ? $_POST['order-by'] : $sessionOrder;
                 $selectedStaff = isset($_POST['staff']) ? $_POST['staff'] : $sessionStaff;
 
-                $staffs = RequestSQL::getAllStaff(true, $selectedBranch);
+                $staffs = RequestSQL::getAllStaff(false, $selectedBranch);
 
                 function isSelected($option, $selectedValue)
                 {
@@ -56,11 +56,7 @@
                     value="<?php echo $selectedDate; ?>">
                 <select class="form-select rounded mb-3 me-3" name="group-by" id="group-by">
                     <option value="">-- Group By --</option>
-                    <option value="daily" <?php echo isSelected('daily', $selectedGroup); ?>>Daily</option>
-                    <option value="weekly" <?php echo isSelected('weekly', $selectedGroup); ?>>Weekly</option>
                     <option value="monthly" <?php echo isSelected('monthly', $selectedGroup); ?>>Monthly</option>
-                    <option value="semi-annually" <?php echo isSelected('semi-annually', $selectedGroup); ?>>
-                        Semi-Annually</option>
                     <option value="annually" <?php echo isSelected('annually', $selectedGroup); ?>>Annually</option>
                 </select>
 
@@ -95,7 +91,7 @@
                     ?>
                 </select>
 
-                <button class="btn btn-secondary mb-3 rounded" type="submit">Search</button>
+                <button class="btn custom-btn-secondary mb-3 rounded" type="submit">Search</button>
             </form>
 
         </div>

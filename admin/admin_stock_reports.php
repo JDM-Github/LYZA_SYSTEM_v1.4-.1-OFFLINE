@@ -5,7 +5,7 @@
         <div class="card shadow p-1 bg-body-tertiary rounded border-0 mb-3">
             <div class="d-flex justify-content-between">
                 <p class="fw-bold border-start border-3 border-success px-4 m-3 mb-3">
-                    Dashboard
+                    Inventory
                 </p>
 
                 <form action="" class="border-0 d-flex m-1" method="post">
@@ -19,10 +19,9 @@
                             background: #369B71;
                         }
                     </style>
-                    <button id="printChartButton" class="btn btn-success ms-3 border-dark-green" type="button"
+                    <button id="printChartButton" class="btn custom-btn-success ms-3 border-dark-green" type="button"
                         onclick="printStockHistory()">Download
                         History</button>
-
                 </form>
 
             </div>
@@ -35,6 +34,7 @@
                     Filter
                 </p>
                 <form action="" class="form-control border-0 d-flex bg-body-tertiary" method="post">
+
                     <?php
                     $branches = RequestSQL::getAllBranches();
                     $sessionBranch = '';
@@ -51,7 +51,7 @@
                     $selectedStaff = isset($_POST['staff']) ? $_POST['staff'] : $sessionStaff;
                     $selectedGroup = isset($_POST['group-by']) ? $_POST['group-by'] : $sessionGroup;
 
-                    $staffs = RequestSQL::getAllStaff(true, $selectedBranch);
+                    $staffs = RequestSQL::getAllStaff(false, $selectedBranch);
 
                     function isSelected($option, $selectedValue)
                     {
@@ -85,11 +85,7 @@
                     </select>
                     <select class="form-select rounded mb-3 me-3" name="group-by" id="group-by">
                         <option value="">-- Group By --</option>
-                        <option value="daily" <?php echo isSelected('daily', $selectedGroup); ?>>Daily</option>
-                        <option value="weekly" <?php echo isSelected('weekly', $selectedGroup); ?>>Weekly</option>
                         <option value="monthly" <?php echo isSelected('monthly', $selectedGroup); ?>>Monthly</option>
-                        <option value="semi-annually" <?php echo isSelected('semi-annually', $selectedGroup); ?>>
-                            Semi-Annually</option>
                         <option value="annually" <?php echo isSelected('annually', $selectedGroup); ?>>Annually</option>
                     </select>
 

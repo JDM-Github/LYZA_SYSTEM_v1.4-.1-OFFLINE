@@ -1,91 +1,115 @@
-<footer class="banner-foot pt-2">
-    <div class="container d-flex justify-content-between">
-        <div class="d-flex">
-            <img src="img/LyzaVectorLogoWhite.png" class="me-3 align-self-center" alt="Lyza Drugmart" width="32"
-                height="32">
-            <span class="text-white align-self-center"><small>Copyright © 2024 Lyza Drugmart. All Rights
-                    Reserved.</small></span>
-        </div>
+<!-- Banner-Foot --------------------------------------------------------------------------------------------------------->
 
-        <div class="d-flex">
-            <i class="bi bi-telephone-fill text-white align-self-center me-3"></i>
-            <small>
-                <span class="badge m-0 border border-light text-white">0933-320-4510</span>
-                <span class="badge m-0 text-bg-light text-success">096-3340-5214</span>
-            </small>
-        </div>
+<footer class="landing-copyright pt-2">
+    <div class="container d-flex justify-content-center">
+        <img src="img/LyzaVectorLogoWhite.png" class="me-3 align-self-center" alt="Lyza Drugmart" width="32"
+            height="32">
+        <span class="text-white align-self-center"><small>Copyright © 2024 Lyza Drugmart. All Rights
+                Reserved.</small></span>
     </div>
 </footer>
 
-<!--- AJAX Script ----->
+<!--- AJAX Script | Tab switching ----->
 <script>
     $(document).ready(function () {
-        // Category filter click event
-        $('.category-pill').on('click', function (e) {
+        // Default Content Load
+        $('#content').load('client/client_home.php');
+
+        // Navbar Tab Switching
+        $('#homeTab').click(function (e) {
             e.preventDefault();
-            $('.category-pill').removeClass('active');
-            $(this).addClass('active');
-            filterProducts(); // Call the function to filter products
-        });
-
-        // Search button click event
-        $('#search-button-home').on('click', function () {
-            filterProducts(); // Call the function to filter products
-        });
-
-        // Enter key press event on the search input field
-        $('#search-input').on('keypress', function (e) {
-            if (e.which == 13) { // 13 is the Enter key code
-                filterProducts(); // Trigger the search when "Enter" is pressed
-            }
-        });
-
-        // Function to filter products based on selected category and search term
-        function filterProducts() {
-            var selectedCategory = $('.category-pill.active').attr('data-category'); // Get selected category
-            var searchTerm = $('#search-input').val(); // Get search term from the search input
-
-            $.ajax({
-                url: 'get_products.php', // Call to the PHP script
-                method: 'POST', // Use POST method
-                data: {
-                    category: selectedCategory,
-                    searchTerm: searchTerm // Send category and search term to PHP
-                },
-                dataType: 'json',
-                success: function (response) {
-                    $('#product-grid').empty(); // Clear existing products
-
-                    // Check if there are any products in the response
-                    if (response.length > 0) {
-                        // Loop through the response and generate product cards
-                        $.each(response, function (index, product) {
-                            var productCard = `
-                            <div class="col-md-3">
-                                <div class="card shadow bg-body-tertiary rounded border-0">
-                                    <img src="img/${product.image_path}" class="card-img-top rounded" height="250" width="auto" alt="${product.product_name}">
-                                    <div class="card-body">
-                                        <span class="badge text-bg-secondary p-1 mb-1">${product.category}</span>
-                                        <p class="m-0">${product.product_name}</p>
-                                        <div class="d-flex justify-content-between">
-                                            <p class="fw-bold m-0">₱${product.price}</p>
-                                            <p class="m-0">${product.stock} item/s</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                            $('#product-grid').append(productCard); // Append each product to the grid
-                        });
-                    } else {
-                        // Display message if no products are found
-                        $('#product-grid').append('<p>No products found.</p>');
-                    }
-                }
+            $('#content').load('client/client_home.php', function () {
+                $('#content').on('click', 'a[page-target="home"]', function (e) {
+                    e.preventDefault();
+                    var href = $(this).attr('href');
+                    $('#content').load(`client/client_products.php?${href}`, function () {
+                        setActiveTab($('#productsTab'));
+                    });
+                });
             });
+            setActiveTab($(this));
+        });
+
+        $('#productsTab').click(function (e) {
+            e.preventDefault();
+            $('#content').load('client/client_products.php', function () {
+                $('#content').on('click', 'a[page-target="products"]', function (e) {
+                    e.preventDefault();
+                    var href = $(this).attr('href');
+                    $('#content').load(`client/client_products.php?${href}`);
+                });
+
+                $('#content').on('submit', 'form', function (e) {
+                    e.preventDefault();
+                    var searchValue = $(this).find('input[name="search-value"]').val();
+                    $('#content').load(`client/client_products.php?search-value=${searchValue}`);
+                });
+            });
+            setActiveTab($(this));
+        });
+
+        $('#storeTab').click(function (e) {
+            e.preventDefault();
+            $('#content').load('client/client_store.php');
+            setActiveTab($(this));
+        });
+
+        $('#aboutusTab').click(function (e) {
+            e.preventDefault();
+            $('#content').load('client/client_aboutus.php');
+            setActiveTab($(this));
+        });
+
+        // Footer Quick Links Switching
+        $('#homeFooter').click(function (e) {
+            e.preventDefault();
+            $('#content').load('client/client_home.php');
+        });
+
+        $('#productsFooter').click(function (e) {
+            e.preventDefault();
+            $('#content').load('client/client_products.php');
+        });
+
+        $('#storeFooter').click(function (e) {
+            e.preventDefault();
+            $('#content').load('client/client_store.php');
+        });
+
+        $('#aboutusFooter').click(function (e) {
+            e.preventDefault();
+            $('#content').load('client/client_aboutus.php');
+        });
+
+        // Active Class Toggler for Navbar
+        function setActiveTab(currentTab) {
+            $('.navbar-nav .nav-link').removeClass('active');
+            currentTab.addClass('active');
         }
     });
+</script>
 
+<!--- Navbar Collapse Toggler ----->
+<script>
+    // Collapse the navbar when a nav-item is clicked
+    document.querySelectorAll('.nav-link').forEach(item => {
+        item.addEventListener('click', function () {
+            const navbarCollapse = document.getElementById('landingMenu');
+            if (navbarCollapse.classList.contains('show')) {
+                navbarCollapse.classList.remove('show');
+                const toggler = document.querySelector('.navbar-toggler');
+                toggler.setAttribute('aria-expanded', 'false');
+            }
+        });
+    });
+
+    // Collapse the navbar when the toggler button is clicked
+    document.querySelector('.navbar-toggler').addEventListener('click', function () {
+        const navbarCollapse = document.getElementById('landingMenu');
+        navbarCollapse.classList.toggle('show');
+        const expanded = navbarCollapse.classList.contains('show');
+        this.setAttribute('aria-expanded', expanded);
+    });
 </script>
 
 <!--- See Password ----->
@@ -101,9 +125,7 @@
 </script>
 
 <!--- Bootstrap JS ----->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-    crossorigin="anonymous"></script>
+<script src="bootstrap/js/bootstrap.bundle.min.js"></script>
 
 </body>
 

@@ -1,28 +1,23 @@
 <header>
     <!----- Navigation | Admin Page ----->
     <div class="custom-nav-header">
-        <div class="container align-items-bottom d-flex justify-content-between pt-1">
-            <small class="text-white">Admin Dashboard > Welcome, Admin!</small>
-            <div>
-                <small class="text-white mt-2" id="time">Day |</small>
-                <small class="text-white mt-2" id="time">00:00:00</small>
-                <small><span class="badge m-0 text-bg-light text-success">Month DD</span></small>
-            </div>
+        <div class="container align-items-bottom  pt-1">
+            <small class="text-white text-center">Admin Dashboard > Welcome, Admin!</small>
         </div>
     </div>
 
     <nav class="navbar custom-navbar shadow" id="navbar">
-        <div class="container">
-            <div class="d-inline-flex align-items-center custom-logo-label">
-                <img class="me-2 p-0" src="../img/LyzaVectorLogo.png" alt="Lyza Drugmart" width="35" height="30">
-
+        <div class="container d-flex justify-content-between align-items-center">
+            <!----- Logo/Brand ----->
+            <div class="justify-content-start align-self-center">
+                <img class="align-self-start" src="img/BusinessName.png" alt="Lyza Drugmart" width="190"
+                height=""><br>
+                <span class="pt-0 fw-bold" style="color: var(--dark);">BRANDED & GENERIC MEDICINES</span>
             </div>
 
-            <h2 class=" fw-bold fs-4">Lyza Drugmart</h2>
-
             <!----- Log Out ----->
-            <a class="btn btn-secondary p-2" type="button" href="index.php">
-                <small><i class="bi bi-box-arrow-right"></i>&nbsp;LOG OUT </small>
+            <a class="btn custom-btn-success rounded-4 py-2 px-4" type="button" href="index.php">
+                <small>LOG OUT </small>
             </a>
         </div>
     </nav>

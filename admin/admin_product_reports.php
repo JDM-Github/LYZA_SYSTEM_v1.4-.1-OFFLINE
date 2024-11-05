@@ -1,3 +1,7 @@
+<?php
+$currentUrl = $_SERVER['REQUEST_URI'];
+$_SESSION['current_url'] = $currentUrl;
+?>
 <div class="content ms-3" id="stocks">
 
     <!-- Add New Product -->
@@ -110,7 +114,6 @@
 
                 <button class="btn btn-secondary mb-3 rounded" type="submit">Search</button>
             </form>
-
         </div>
 
         <div>
@@ -125,8 +128,6 @@
         </div>
     </div>
 </div>
-
-
 
 <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -144,12 +145,35 @@
                             placeholder="Enter product name" required>
                     </div>
 
+                    <?php $generics = RequestSQL::getGenericBrand(); ?>
+                    <div class="mb-3">
+                        <label for="productGeneric" class="form-label">Generic</label>
+                        <select class="form-select" id="productGeneric" name="productGeneric" required
+                            onchange="toggleNewGeneric()">
+                            <option value="" disabled selected>Select Generic</option>
+                            <?php
+                            if ($generics) {
+                                while ($generic = $generics->fetch_assoc()) {
+                                    $genericBrand = $generic['genericBrand'];
+                                    echo "<option value='{$genericBrand}'>{$genericBrand}</option>";
+                                }
+                            }
+                            ?>
+                            <option value="newGeneric">New Generic</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="newGenericDiv" style="display: none;">
+                        <label for="newGenericName" class="form-label">New Generic Name</label>
+                        <input type="text" class="form-control" id="newGenericName" name="newGenericName"
+                            placeholder="Enter new generic name">
+                    </div>
+
                     <?php $categories = RequestSQL::getAllCategories(); ?>
                     <div class="mb-3">
                         <label for="productCategory" class="form-label">Category</label>
                         <select class="form-select" id="productCategory" name="productCategory" required
                             onchange="toggleNewCategoryDiv()">
-                            <option value="">Select Category</option>
+                            <option value="" disabled selected>Select Category</option>
                             <?php
                             if ($categories) {
                                 while ($category = $categories->fetch_assoc()) {
@@ -184,10 +208,29 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="productStock" class="form-label">Stock</label>
+                        <label for="productStock" class="form-label">Initial Stock</label>
                         <input type="number" class="form-control" id="productStock" name="productStock"
                             placeholder="Enter stock quantity" required>
                     </div>
+
+                    <div class="mb-3">
+                        <label for="expirationDate" class="form-label">Initial Expiration Date</label>
+                        <input type="date" class="form-control" id="expirationDate" name="expirationDate"
+                            placeholder="Enter first stock expiration date" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="productUnit" class="form-label">Unit</label>
+                        <select class="form-select" id="productUnit" name="productUnit" required>
+                            <option value="" disabled selected>Select a Unit</option>
+                            <option value="Tablet">per Tablet</option>
+                            <option value="Box">per Box</option>
+                            <option value="Pack">per Pack</option>
+                            <option value="Bottle">per Bottle</option>
+                            <option value="Sachet">per Sachet</option>
+                        </select>
+                    </div>
+
                     <div class="mb-3">
                         <label for="productPrice" class="form-label">Price</label>
                         <input type="number" step="0.01" class="form-control" id="productPrice" name="productPrice"
@@ -214,14 +257,14 @@
 </div>
 
 <script>
-    const productQRCodeInput = document.getElementById('productQRCode');
+    // const productQRCodeInput = document.getElementById('productQRCode');
 
-    // DETECT THE QR CODE (TEST NIO NALANG)
-    productQRCodeInput.addEventListener('input', function (event) {
-        const scannedData = event.target.value;
-        // alert("Scanned QR Code Data:", scannedData);
-        productQRCodeInput.value = scannedData;
-    });
+    // // DETECT THE QR CODE (TEST NIO NALANG)
+    // productQRCodeInput.addEventListener('input', function (event) {
+    //     const scannedData = event.target.value;
+    //     // alert("Scanned QR Code Data:", scannedData);
+    //     productQRCodeInput.value = scannedData;
+    // });
 </script>
 
 <script>
@@ -233,6 +276,17 @@
             newCategoryDiv.style.display = "block";
         } else {
             newCategoryDiv.style.display = "none";
+        }
+    }
+
+    function toggleNewGeneric() {
+        const newGenericDiv = document.getElementById("newGenericDiv");
+        const selectedGeneric = document.getElementById("productGeneric").value;
+
+        if (selectedGeneric === "newGeneric") {
+            newGenericDiv.style.display = "block";
+        } else {
+            newGenericDiv.style.display = "none";
         }
     }
     function confirmArchive(check) {

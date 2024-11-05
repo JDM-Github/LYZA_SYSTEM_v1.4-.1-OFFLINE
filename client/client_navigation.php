@@ -1,35 +1,40 @@
-<header>
-    <nav class="navbar custom-navbar shadow" id="navbar">
+    <!----- Landing Page Navigation ----->
+    <nav class="navbar navbar-expand-lg custom-navbar shadow">
         <div class="container">
-            <!----- Logo/Brand ----->
-            <div class="d-inline-flex custom-logo-label">
-                <img class="me-2 align-self-center" src="img/LyzaVectorLogo.png" alt="Lyza Drugmart" width="35"
-                    height="30">
-                <h1 class="align-self-center fs-5 pt-1 fw-bold" style="color: var(--green);">LYZA DRUGMART</h1>
-            </div>
-
-            <!----- Toggle Offcanvass | Login Form ----->
-            <button class="btn rounded-pill custom-btn-success py-2 px-3" type="button" data-bs-toggle="offcanvas"
-                data-bs-target="#login-form-offcanvass" aria-controls="login-form-offcanvass">
-                <small></i>&nbsp;LOG IN</small>
+            <!----- Toggle Offcanvass | Menu ----->
+            <button class="navbar-toggler border-white my-3" type="button" data-bs-toggle="collapse"
+                data-bs-target="#landingMenu" aria-controls="landingMenu" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <i class="bi bi-list text-white"></i>
             </button>
+
+            <!----- Offcanvass | Menu ----->
+            <div class="collapse navbar-collapse " id="landingMenu">
+                <div class="navbar-nav mb-3 mb-lg-0 mx-auto">
+                    <div class="nav-item px-5">
+                        <a class="nav-link custom-nav-item active fs-5 px-3 fw-bold" href="#" id="homeTab">
+                            <span>HOME</span>
+                        </a>
+                    </div>
+                    <div class="nav-item px-5">
+                        <a class="nav-link custom-nav-item fs-5 px-3 fw-bold" href="#" id="productsTab">
+                            <span>PRODUCTS</span>
+                        </a>
+                    </div>
+                    <div class="nav-item px-5">
+                        <a class="nav-link custom-nav-item fs-5 px-3 fw-bold" href="#" id="storeTab">
+                            <span>STORE</span>
+                        </a>
+                    </div>
+                    <div class="nav-item px-5">
+                        <a class="nav-link custom-nav-item fs-5 px-3 fw-bold" href="#" id="aboutusTab">
+                            <span>ABOUT US</span>
+                        </a>
+                    </div>
+                </div>  
+            </div>
         </div>
     </nav>
 
-    <!----- Offcanvass Body | Login Form ----->
-    <div class="offcanvas offcanvas-end" data-bs-backdrop="static" tabindex="-1" id="login-form-offcanvass"
-        aria-labelledby="login-form-label">
 
-        <div class="offcanvas-header mb-0 pb-0">
-            <!----- Close Form ----->
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-
-        <!----- Login Form Body ----->
-        <div class="offcanvas-body">
-            <?php
-            include "includes/login.inc.php";
-            ?>
-        </div>
-    </div>
-</header>
+    

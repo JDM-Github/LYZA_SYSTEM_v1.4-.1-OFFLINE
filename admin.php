@@ -2,6 +2,11 @@
 session_start();
 require_once "backend/request.php";
 require_once "backend/functions.php";
+$_SESSION['online'] = RequestSQL::isOffline();
+if (!$_SESSION['online']) {
+    header('Location: index.php');
+    exit;
+}
 
 if (!isset($_SESSION['account']) || $_SESSION['account']['isAdmin'] == '0') {
     header('Location: index.php');
@@ -11,6 +16,7 @@ if (!isset($_SESSION['account']) || $_SESSION['account']['isAdmin'] == '0') {
 include "admin/admin_header.php";
 include "admin/admin_navigation.php";
 require_once("modals/modals.php");
+
 if (isset($_SESSION['success-message'])) {
     echo "<script>showSuccessModal('{$_SESSION['success-message']}');</script>";
     unset($_SESSION['success-message']);

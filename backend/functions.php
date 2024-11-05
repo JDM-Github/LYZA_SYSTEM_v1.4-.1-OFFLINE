@@ -7,6 +7,227 @@ class AdminClass
     {
         return $option === $selectedValue ? 'selected' : '';
     }
+
+    static function getStringModal(
+        $modalId,
+        $modalTitle,
+        $value,
+        $productId,
+        $branchId,
+        $productName,
+        $genericBrand,
+        $categoryName,
+        $branchName,
+        $productStock,
+        $unit,
+        $price,
+        $productImage,
+        $qrCode,
+        $isAddProductStock = false,
+        $isDiscardProductStock = false,
+        $isChangePrice = false
+    ) {
+        return "
+        <div class='modal fade' id='$modalId' tabindex='-1' aria-labelledby='$modalId-label' aria-hidden='true'>
+            <div class='modal-dialog'>
+                <div class='modal-content'>
+                    <div class='modal-header'>
+                        <h5 class='modal-title' id='$modalId-label'>$modalTitle</h5>
+                        <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+                    </div>
+                    <div class='modal-body'>
+                        <form id='$modalId-form' method='POST' action='backend/redirector.php'>
+                            <input type='hidden' name='type' value='$value'>
+                            <input type='hidden' name='product_id' value='$productId'>
+                            <input type='hidden' name='branch_id' value='$branchId'>
+
+                            <div class='mb-3'>
+                                <label for='productName' class='form-label'>Product ID</label>
+                                <input type='text' class='form-control' value='$productId' disabled>
+                            </div>
+        
+                            <div class='mb-3'>
+                                <label for='productName' class='form-label'>Product Name</label>
+                                <input type='text' class='form-control' value='$productName' disabled>
+                            </div>
+
+                            <div class='mb-3'>
+                                <label for='productGeneric' class='form-label'>Generic</label>
+                                <select class='form-select' disabled>
+                                    <option selected>{$genericBrand}</option>';
+                                </select>
+                            </div>
+
+                            <div class='mb-3'>
+                                <label for='productCategory' class='form-label'>Category</label>
+                                <select class='form-select' disabled>
+                                    <option selected>{$categoryName}</option>';
+                                </select>
+                            </div>
+
+                            <div class='mb-3'>
+                                <label for='assignedBranch' class='form-label'>Assigned Branch</label>
+                                <select class='form-select' disabled>
+                                    <option selected>{$branchName}</option>';
+                                </select>
+                            </div>
+
+                            <div class='mb-3'>
+                                <label for='productStock' class='form-label'>Old Stock</label>
+                                <input type='number' class='form-control' disabled value='$productStock'>
+                            </div>
+
+                            " .
+            ($isAddProductStock ?
+                "
+                            <div class='mb-3'>
+                                <label for='productStock' class='form-label'>Add Stock</label>
+                                <input type='number' class='form-control' id='productStock' name='productStock'
+                                    value='0' min='0' placeholder='Enter stock quantity' required>
+                            </div>
+                            <div class='mb-3'>
+                                <label for='expirationDate' class='form-label'>Add Expiration Date</label>
+                                <input 
+                                    type='date' 
+                                    class='form-control' 
+                                    id='expirationDate' 
+                                    name='expirationDate'
+                                    placeholder='Enter expiration date' 
+                                    required 
+                                    min='" . date('Y-m-d', strtotime('+1 day')) . "'
+                                >
+                            </div>" : "")
+            . "
+
+                            " .
+            ($isDiscardProductStock ?
+                "
+                            <div class='mb-3'>
+                                <label for='productStock' class='form-label'>Discard Stock</label>
+                                <input type='number' class='form-control' id='productStock' name='productStock'
+                                    value='0' placeholder='Enter stock quantity' required>
+                            </div>" : "")
+            . "
+
+                            <div class='mb-3'>
+                                <label for='productUnit' class='form-label'>Unit</label>
+                                <select class='form-select' disabled>
+                                    <option selected>per $unit</option>
+                                </select>
+                            </div>
+
+                            <div class='mb-3'>
+                                <label for='productPrice' class='form-label'>Price</label>
+                                <input type='text' class='form-control' disabled value='$price'>
+                            </div>
+
+                            " .
+            ($isChangePrice ?
+                "
+                            <div class='mb-3'>
+                                <label for='productStock' class='form-label'>New Price</label>
+                                <input type='number' class='form-control' id='productPrice' name='productPrice'
+                                    placeholder='Enter price' required>
+                            </div>" : "")
+            . "
+
+                            <div class='mb-3'>
+                                <label for='productImage' class='form-label'>Product Image</label>
+                                <input class='form-control' disabled value='$productImage'>
+                            </div>
+                            <div class='mb-3'>
+                                <label for='productQRCode' class='form-label'>Product QR Code</label>
+                                <input type='text' class='form-control' disabled value='$qrCode'>
+                            </div>
+                        </form>
+                    </div>
+                    <div class='modal-footer'>
+                        <button type='button' class='btn btn-danger' data-bs-dismiss='modal'>Close</button>
+                        <button type='submit' class='btn btn-secondary rounded' form='$modalId-form'>UPDATE</button>
+                    </div>
+                </div>
+            </div>
+        </div>";
+    }
+
+    static function getStockStatus($expirationDate)
+    {
+        $today = new DateTime();
+        $expDate = new DateTime($expirationDate);
+        $interval = $today->diff($expDate);
+
+        if ($expDate < $today) {
+            return "Expired";
+        } elseif ($interval->m < 1) {
+            return "Close to Expiring";
+        } else {
+            return "Good";
+        }
+    }
+
+    static function getDiscardStockHistory($modalId, $productName, $productId)
+    {
+        $stockHistory = RequestSQL::getAllProductHistory($productId);
+        $modalContent = "<div class='modal fade' id='$modalId' tabindex='-1' aria-labelledby='stockHistoryModalLabel' aria-hidden='true'>
+        <div class='modal-dialog modal-lg'>
+            <div class='modal-content'>
+                <div class='modal-header'>
+                    <h5 class='modal-title' id='stockHistoryModalLabel'>$productName Stock History</h5>
+                    <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+                </div>
+                <div class='modal-body'>
+                    <table class='table'>
+                        <thead>
+                            <tr>
+                                <th>Quantity</th>
+                                <th>Remaining Stock</th>
+                                <th>Expiration Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>";
+
+        if (count($stockHistory) > 0) {
+            foreach ($stockHistory as $history) {
+                $modalContent .= "
+                    <tr>
+                        <td>" . htmlspecialchars($history['quantity']) . "</td>
+                        <td>" . htmlspecialchars($history['remainingStock']) . "</td>
+                        <td>" . htmlspecialchars($history['expirationDate']) . "</td>
+                        <td>" . AdminClass::getStockStatus($history['expirationDate']) . "</td>
+                        <td>
+                            <form method='POST' action='backend/redirector.php'>
+                                <input type='hidden' name='type' value='discard-single'>
+                                <input type='hidden' name='productId' value='" . htmlspecialchars($productId) . "'>
+                                <input type='hidden' name='remainingStock' value='" . htmlspecialchars($history['remainingStock']) . "'>
+                                <input type='hidden' name='historyId' value='" . htmlspecialchars($history['id']) . "'>
+                                <button type='submit' class='btn btn-danger'>Discard</button>
+                            </form>
+                        </td>
+                    </tr>";
+            }
+        } else {
+            $modalContent .= "
+                <tr>
+                    <td colspan='5' class='text-center'>No stock history available.</td>
+                </tr>";
+        }
+
+        $modalContent .= "
+                    </tbody>
+                </table>
+                </div>
+                <div class='modal-footer'>
+                    <button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Close</button>
+                </div>
+            </div>
+        </div>
+    </div>";
+
+        return $modalContent;
+    }
+
     static function loadAllAccounts($accounts)
     {
         echo "<table class='table table-sm table-hover'>";
@@ -14,13 +235,14 @@ class AdminClass
             while ($account = $accounts->fetch_assoc()) {
                 $status = strtolower($account['userStatus']);
 
-                $isRemoved = $status === 'removed';
+                $isRemoved = $status === 'removed' || $account['isAdmin'] == "1";
                 $isActive = $status === 'active';
                 $isDisabled = $status === 'disabled';
 
                 $isAdmin = $account['isAdmin'] == "1" ? "ADMIN" : "CLIENT";
                 $isStatus = $account['isAdmin'] == "1" ? "badge bg-success" : "badge bg-secondary";
 
+                $modalId = "change-pass-" . $account["id"];
                 echo
                     "<tr>
                         <td class='align-content-center ps-4'>
@@ -48,32 +270,62 @@ class AdminClass
                             <small><span class='{$isStatus}'>{$isAdmin}</span></small>
                         </td>
 
-                        <td class='align-content-center ms-auto'>
+                        <td class='align-content-center ms-auto d-flex'>
+                            <button class='btn btn-secondary p-1 me-3' type='submit' id='change-pass' data-bs-toggle='modal' data-bs-target='#$modalId'>
+                                <small><span>Forgot Password</span></small>
+                            </button>
+
+                            <div class='modal fade' id='$modalId' tabindex='-1' aria-labelledby='$modalId-label' aria-hidden='true'>
+                                <div class='modal-dialog modal-dialog-top'>
+                                    <div class='modal-content'>
+                                        <div class='modal-header'>
+                                            <h5 class='modal-title' id='$modalId-label'>{$account['userName']} Forgot Password</h5>
+                                            <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+                                        </div>
+                                        <div class='modal-body'>
+                                            <form id='$modalId-form' method='POST' action='backend/redirector.php'>
+                                                <input type='hidden' name='type' value='change-password'>
+                                                <input type='hidden' name='id' value='{$account['id']}'>
+                                                
+                                                <div class='mb-3'>
+                                                    <label for='newPassword' class='form-label'>New Password</label>
+                                                    <input type='password' class='form-control' id='newPassword' name='newPassword' required>
+                                                </div>
+                                                <div class='mb-3'>
+                                                    <label for='confirmPassword' class='form-label'>Confirm New Password</label>
+                                                    <input type='password' class='form-control' id='confirmPassword' name='confirmPassword' required>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class='modal-footer'>
+                                            <button type='button' class='btn btn-danger' data-bs-dismiss='modal'>Cancel</button>
+                                            <button type='submit' form='$modalId-form' class='btn btn-secondary'>Update Password</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <form action='backend/redirector.php' method='POST' onsubmit='return confirmDeactivate()'>
                                 <input type='hidden' name='user_id' value='{$account['id']}'>
                                 <input type='hidden' name='userStatus' value='disabled'>
                                 <input type='hidden' name='type' value='admin-set-user-status'>
-                                <button class='btn btn-danger p-1' type='submit' id='deactivate-btn' 
+                                <button class='btn btn-danger p-1 me-3' type='submit' id='deactivate-btn' 
                                     " . ($isDisabled || $isRemoved ? "disabled" : "") . ">
                                     <small><i class='bi bi-trash-fill me-2'></i><span>Deactivate</span></small>
                                 </button>
                             </form>
-                        </td>
 
-                        <td class='align-content-center ms-auto'>
                             <form action='backend/redirector.php' method='POST' onsubmit='return confirmActivate()'>
                                 <input type='hidden' name='user_id' value='{$account['id']}'>
                                 <input type='hidden' name='userStatus' value='active'>
                                 <input type='hidden' name='type' value='admin-set-user-status'>
 
-                                <button class='btn btn-success p-1' type='submit' id='activate-btn' 
+                                <button class='btn btn-success p-1 me-3' type='submit' id='activate-btn' 
                                         " . ($isActive || $isRemoved ? "disabled" : "") . ">
                                     <small><i class='bi bi-check-circle-fill me-2'></i><span>Activate</span></small>
                                 </button>
                             </form>
-                        </td>
-                            
-                        <td class='align-content-center ms-auto'>
+
                             <form action='backend/redirector.php' method='POST' onsubmit='return confirmRemoval()'>
                                 <input type='hidden' name='user_id' value='{$account['id']}'>
                                 <input type='hidden' name='userStatus' value='removed'>
@@ -85,6 +337,7 @@ class AdminClass
                                 </button>
                             </form>
                         </td>
+
 
                     </tr>";
             }
@@ -242,10 +495,16 @@ class AdminClass
                         <small><span class="fw-bold">Branch Name</span></small>
                     </th>
                     <th class="ps-4">
+                        <small><span class="fw-bold">Generic</span></small>
+                    </th>
+                    <th class="ps-4">
                         <small><span class="fw-bold">Category</span></small>
                     </th>
                     <th>
                         <small><span class="fw-bold">Item</span></small>
+                    </th>
+                    <th class="ps-4">
+                        <small><span class="fw-bold">Unit</span></small>
                     </th>
                     <th>
                         <small><span class="fw-bold">Stock</span></small>
@@ -279,16 +538,24 @@ class AdminClass
 
                 $isArchived = $product['isArchived'] == "0" ? 'Archived' : 'Unarchived';
                 $modalId = 'change-modal-' . $product['id'];
+                $stockModalId = 'stock-modal-' . $product['id'];
+                $discardStockModalId = 'discard-stock-modal-' . $product['id'];
                 echo
                     "<tr>
                         <td class='align-content-center ps-4'>
                             <small><span>{$product['branchName']}</span></small>
                         </td>
                         <td class='align-content-center ps-4'>
+                            <small><span class='badge text-bg-secondary'>{$product['genericBrand']}</span></small>
+                        </td>
+                        <td class='align-content-center ps-4'>
                             <small><span class='badge text-bg-secondary'>{$product['productCategory']}</span></small>
                         </td>
                         <td class='align-content-center'>
                             <span>{$product['productName']}</span>
+                        </td>
+                        <td class='align-content-center ps-4'>
+                            <small><span class='badge text-bg-secondary'>{$product['productUnit']}</span></small>
                         </td>
                         <td class='align-content-center'>
                             <small><span class='fw-bold'>x{$product['productStock']}</span></small>
@@ -309,39 +576,64 @@ class AdminClass
                                     <small><i class='bi bi-trash-fill me-2'></i></i><span>{$isArchived}</span></small>
                                 </button>
                             </form>
-                            <button class='btn btn-secondary p-1' type='button' data-bs-toggle='modal' data-bs-target='#$modalId'>
+                            <button class='btn btn-secondary p-1 me-2' type='button' data-bs-toggle='modal' data-bs-target='#$modalId'>
                                 <small>Change Price</small>
                             </button>
 
-                            <div class='modal fade' id='$modalId' tabindex='-1' aria-labelledby='$modalId-label'
-                                aria-hidden='true'>
-                                <div class='modal-dialog'>
-                                    <div class='modal-content'>
-                                        <div class='modal-header'>
-                                            <h5 class='modal-title' id='$modalId-label'>Change {$product['productName']} Price</h5>
-                                            <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
-                                        </div>
-                                        <div class='modal-body'>
-                                            <form id='$modalId-changeProductPrice' method='POST' action='backend/redirector.php'>
-                                                <div class='mb-3'>
-                                                    <label for='product_price' class='form-label'>New Price</label>
-                                                    <input type='hidden' name='type' value='admin-change-price'>
-                                                    <input type='hidden' name='product_id' value='{$product['id']}'>
-                                                    <input type='number' class='form-control' id='product_price' name='product_price'
-                                                        placeholder='Enter new price' required>
-                                                </div>
-                                            </form>
-                                        </div>
-                                        <div class='modal-footer'>
-                                            <button type='button' class='btn btn-danger' data-bs-dismiss='modal'>Close</button>
-                                            <button type='submit' class='btn btn-secondary' form='$modalId-changeProductPrice'>Change Price</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+
+                            " . AdminClass::getStringModal(
+                            $modalId,
+                            "Change {$product['productName']} Price",
+                            "admin-change-price",
+                            "{$product['id']}",
+                            "{$product['branch_id']}",
+                            "{$product['productName']}",
+                            "{$product['genericBrand']}",
+                            "{$product['productCategory']}",
+                            "{$product['branchName']}",
+                            "{$product['productStock']}",
+                            "{$product['productUnit']}",
+                            "{$product['productPrice']}",
+                            "{$product['productImage']}",
+                            "{$product['barCode']}",
+                            false,
+                            false,
+                            true
+                        ) . "
+
+                            <button class='btn btn-success p-1 me-2' type='button' data-bs-toggle='modal' data-bs-target='#$stockModalId'>
+                                <small>Add Stock</small>
+                            </button>
+
+                            " . AdminClass::getStringModal(
+                            $stockModalId,
+                            "Add {$product['productName']} Stock",
+                            "add-stock",
+                            "{$product['id']}",
+                            "{$product['branch_id']}",
+                            "{$product['productName']}",
+                            "{$product['genericBrand']}",
+                            "{$product['productCategory']}",
+                            "{$product['branchName']}",
+                            "{$product['productStock']}",
+                            "{$product['productUnit']}",
+                            "{$product['productPrice']}",
+                            "{$product['productImage']}",
+                            "{$product['barCode']}",
+                            true
+                        ) . "
+
+                        <button class='btn btn-danger p-1' type='button' data-bs-toggle='modal' data-bs-target='#$discardStockModalId'>
+                                <small>Discard Stock</small>
+                            </button>
+                            "
+                    .
+                    AdminClass::getDiscardStockHistory($discardStockModalId, $product['productName'], $product['id'])
+                    .
+                    "
+                            
                         </td>
-                        
-                        
+
                     </tr>";
             }
         } else {
@@ -373,7 +665,7 @@ class BranchClass
     
                         <!-- Google Map Embed -->
                         <iframe
-                            src='https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3878.9255162384614!2d121.17742671544203!3d14.067197190567972!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd7bf10f60d537%3A0xf00dfbb632efee!2s14.067197%2C%20121.179615!5e0!3m2!1sen!2sph!4v1697721885670!5m2!1sen!2sph'
+                            src='{$branch['pb']}'
                             width='100%' height='450' style='border:0;' allowfullscreen='' loading='lazy'
                             referrerpolicy='no-referrer-when-downgrade'>
                         </iframe>
@@ -407,6 +699,10 @@ class BranchClass
                 echo "<span class='fw-bold'>" . htmlspecialchars($product['productName']) . "</span>";
                 echo "</td>";
                 echo "<td class='align-content-center'>";
+                echo "<small><span class='badge text-bg-secondary'>Generic</span></small><br>";
+                echo "<small><span>" . htmlspecialchars($product['genericBrand']) . "</span></small>";
+                echo "</td>";
+                echo "<td class='align-content-center'>";
                 echo "<small><span>x" . htmlspecialchars($product['productStock']) . " in stock</span></small>";
                 echo "</td>";
                 echo "<td class='align-content-center'>";
@@ -417,6 +713,7 @@ class BranchClass
                 echo "<input type='hidden' name='type' value='branch-add-cart'>";
                 echo "<input type='hidden' name='product_id' value='" . htmlspecialchars($product['id']) . "'>";
                 echo "<input type='hidden' name='branch_id' value='" . htmlspecialchars($product['branchId']) . "'>";
+                echo "<input type='hidden' name='product_barcode' value='" . htmlspecialchars($product['barCode']) . "'>";
                 echo "<input type='hidden' name='product_name' value='" . htmlspecialchars($product['productName']) . "'>";
                 echo "<input type='hidden' name='product_price' value='" . htmlspecialchars($product['productPrice']) . "'>";
                 echo "<input type='hidden' name='product_stock' value='" . htmlspecialchars($product['productStock']) . "'>";
@@ -452,6 +749,21 @@ class BranchClass
                     $all_products .= "</tr>";
                 }
 
+                $all_transaction = '';
+                foreach ($products as $product) {
+                    $all_transaction .= "
+                    <tr>
+                        <td>{$product['productId']}</td>
+                        <td>{$product['productName']}</td>
+
+                        <td>
+                            <input type='hidden' class='form-control' name='itemId[]' value='{$product['id']}'>
+                            <input type='hidden' class='form-control' name='productIds[]' value='{$product['productId']}'>
+                            <input type='number' class='form-control' name='itemQuantity[]' value='{$product['numberProduct']}' min='0' max='{$product['productStock']}' required>
+                        </td>
+                        <td>₱ {$product['productPrice']}</td>
+                    </tr>";
+                }
                 echo "
             <tr>
                 <td class='align-content-center ps-4'>
@@ -480,9 +792,71 @@ class BranchClass
                 </td>
                 <td class='align-content-center'>
                     <input type='hidden' id='product_ordered_list' value='" . htmlspecialchars($row['product_ordered_list']) . "'>
+                    <button class='btn btn-secondary' type='button' data-bs-toggle='modal' data-bs-target='#edit-$modalId'>
+                        <small>Edit</small>
+                    </button>
                     <button class='btn btn-secondary' type='button' data-bs-toggle='modal' data-bs-target='#$modalId'>
                         <small>Details</small>
                     </button>
+
+                    <div class='modal fade' id='edit-$modalId' tabindex='-1' aria-labelledby='edit-$modalId-label' aria-hidden='true'>
+                        <div class='modal-dialog modal-lg'>
+                            <div class='modal-content'>
+                                <div class='modal-header'>
+                                    <h5 class='modal-title' id='edit-$modalId-label'>Edit Transaction ID: {$row['id']}</h5>
+                                    <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+                                </div>
+                                <div class='modal-body'>
+                                    <form id='edit-$modalId-form' method='POST' action='backend/redirector.php'>
+                                        <input type='hidden' name='type' value='update-transaction'>
+                                        <input type='hidden' name='transactionId' value='{$row['id']}'>
+
+                                        <div class='mb-3'>
+                                            <label for='cashReceived' class='form-label'>Cash Received</label>
+                                            <input type='text' class='form-control' id='cashReceived' name='cashReceived' value='{$row['cash_received']}' required>
+                                        </div>
+
+                                        <div class='mb-3'>
+                                            <label for='items' class='form-label'>Items in Transaction</label>
+                                            <table class='table table-sm table-hover'>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Product ID</th>
+                                                        <th>Product Name</th>
+                                                        <th>Quantity</th>
+                                                        <th>Price</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    $all_transaction
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    
+                                        <div class='ms-3 form-check'>
+                                            <input class='form-check-input' type='checkbox' value=' id='seniorDiscount'
+                                                " . ($row['seniorDiscount'] ? 'checked' : '') . ">
+                                            <label class='form-check-label' for='seniorDiscount'>
+                                                Senior Citizen Discount
+                                            </label>
+                                        </div>
+                                        <div class='ms-3 form-check'>
+                                            <input class='form-check-input' type='checkbox' value=' id='pwdDiscount'
+                                                " . ($row['pwdDiscount'] ? 'checked' : '') . ">
+                                            <label class='form-check-label' for='pwdDiscount'>
+                                                Person with Disability Discount
+                                            </label>
+                                        </div>
+                                    </form>
+                                </div>
+                                
+                                <div class='modal-footer'>
+                                    <button type='button' class='btn btn-danger' data-bs-dismiss='modal'>Close</button>
+                                    <button type='submit' class='btn btn-secondary' form='edit-$modalId-form'>Save Changes</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class='modal fade' id='$modalId' tabindex='-1' aria-labelledby='{$modalId}-label' aria-hidden='true'>
                         <div class='modal-dialog modal-lg'>
@@ -581,7 +955,6 @@ class BranchClass
                 $isArchived = $product['productPrice'] ? 'Archived' : 'Unarchived';
 
                 $modalId = 'details-modal-' . $product['id'];
-                // RequestSQL::debugAlert(json_encode($_SESSION['account']));
                 echo
                     "<tr>
                         <td class='align-content-center ps-4'>
@@ -606,55 +979,29 @@ class BranchClass
                             <button class='btn btn-sm btn-secondary rounded' type='button' data-bs-toggle='modal'
                                 data-bs-target='#$modalId'>Restock</button>
 
-                            <div class='modal fade' id='$modalId' tabindex='-1' aria-labelledby='$modalId-label' aria-hidden='true'>
-                                <div class='modal-dialog'>
-                                    <div class='modal-content'>
-                                        <div class='modal-header'>
-                                            <h5 class='modal-title' id='$modalId-label'>Restock {$product['productName']} Product</h5>
-                                            <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
-                                        </div>
-                                        <div class='modal-body'>
-                                            <form id='restockForm' method='post' action='backend/redirector.php'>
-                                                <div class='mb-3'>
-                                                    <label for='quantity' class='form-label'>Quantity</label>
-                                                    <input type='hidden' name='type' value='branch-stock-item'>
-                                                    <input type='hidden' name='user_id' value='{$_SESSION['account']['id']}'>
-                                                    <input type='hidden' name='product_id' value='{$product['id']}'>
-                                                    <input type='hidden' name='branch_id' value='{$product['branchId']}'>
-                                                    <input type='number' class='form-control' id='quantity' name='quantity' min='1' required>
-                                                </div>
-                                                <button type='submit' class='btn btn-secondary'>Restock</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <button class='btn btn-sm btn-secondary rounded' type='button' data-bs-toggle='modal'
-                                data-bs-target='#u$modalId'>Unstock</button>
+                            " . AdminClass::getStringModal(
+                            $modalId,
+                            "Add {$product['productName']} Stock",
+                            "add-stock",
+                            "{$product['id']}",
+                            "{$product['branch_id']}",
+                            "{$product['productName']}",
+                            "{$product['genericBrand']}",
+                            "{$product['productCategory']}",
+                            "{$product['branchName']}",
+                            "{$product['productStock']}",
+                            "{$product['productUnit']}",
+                            "{$product['productPrice']}",
+                            "{$product['productImage']}",
+                            "{$product['barCode']}",
+                            true
+                        ) . "
+                            <button class='btn btn-sm btn-danger rounded' type='button' data-bs-toggle='modal'
+                                data-bs-target='#u$modalId'>Discard</button>
 
-                            <div class='modal fade' id='u$modalId' tabindex='-1' aria-labelledby='u$modalId-label' aria-hidden='true'>
-                                <div class='modal-dialog'>
-                                    <div class='modal-content'>
-                                        <div class='modal-header'>
-                                            <h5 class='modal-title' id='u$modalId-label'>Unstock {$product['productName']} Product</h5>
-                                            <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
-                                        </div>
-                                        <div class='modal-body'>
-                                            <form id='unrestockForm' method='post' action='backend/redirector.php'>
-                                                <div class='mb-3'>
-                                                    <label for='quantity' class='form-label'>Quantity</label>
-                                                    <input type='hidden' name='type' value='branch-unstock-item'>
-                                                    <input type='hidden' name='user_id' value='{$_SESSION['account']['id']}'>
-                                                    <input type='hidden' name='product_id' value='{$product['id']}'>
-                                                    <input type='hidden' name='branch_id' value='{$product['branchId']}'>
-                                                    <input type='number' class='form-control' id='quantity' name='quantity' min='1' max='{$product['productStock']}' required>
-                                                </div>
-                                                <button type='submit' class='btn btn-secondary'>Unstock</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            " .
+                    AdminClass::getDiscardStockHistory("u$modalId", $product['productName'], $product['id'])
+                    . "
                         </td>
 
                     </tr>";

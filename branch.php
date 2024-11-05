@@ -3,7 +3,7 @@ session_start();
 require_once "backend/request.php";
 require_once "backend/functions.php";
 
-$_SESSION['online'] = RequestSQL::isOffline();
+RequestSQL::isOnline();
 if (!isset($_SESSION['account'])) {
     header('Location: index.php');
     exit;

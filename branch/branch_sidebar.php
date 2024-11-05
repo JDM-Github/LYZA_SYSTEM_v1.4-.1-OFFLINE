@@ -6,7 +6,6 @@
             <i class="bi bi-house-door-fill fs-4 py-3 px-4"></i>
         </a>
 
-        <?php if (RequestSQL::getSession('online')) { ?>
             <!-- Transactions -->
             <a class="link-offset-2 link-underline link-underline-opacity-0 d-flex justify-content-center"
                 href="branch.php?page=transactions" id="transaction-branch-tab">
@@ -18,7 +17,7 @@
                 href="branch.php?page=stocks" id="stock-branch-tab">
                 <i class="bi bi-cart-fill fs-4 py-3 px-4"></i>
             </a>
-        <?php } ?>
+        
     </div>
 </div>
 
