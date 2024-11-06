@@ -824,7 +824,8 @@ class ProductHandler
         $database->prepexec($updateQuery, $historyId);
 
         $session->set('success-message', 'Successfully dicarded an items');
-        header("Location: ../admin.php?page=product-report");
+        header("Location: ..{$session->get('current_url')}");
+        exit;
     }
 }
 

@@ -94,7 +94,7 @@ class AdminClass
                                     name='expirationDate'
                                     placeholder='Enter expiration date' 
                                     required 
-                                    min='" . date('Y-m-d', strtotime('+1 day')) . "'
+                                    
                                 >
                             </div>" : "")
             . "
@@ -167,6 +167,7 @@ class AdminClass
 
     static function getDiscardStockHistory($modalId, $productName, $productId)
     {
+        
         $stockHistory = RequestSQL::getAllProductHistory($productId);
         $modalContent = "<div class='modal fade' id='$modalId' tabindex='-1' aria-labelledby='stockHistoryModalLabel' aria-hidden='true'>
         <div class='modal-dialog modal-lg'>
