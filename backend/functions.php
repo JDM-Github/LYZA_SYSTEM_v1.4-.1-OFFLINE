@@ -25,7 +25,8 @@ class AdminClass
         $qrCode,
         $isAddProductStock = false,
         $isDiscardProductStock = false,
-        $isChangePrice = false
+        $isChangePrice = false,
+        $editProduct = false
     ) {
         return "
         <div class='modal fade' id='$modalId' tabindex='-1' aria-labelledby='$modalId-label' aria-hidden='true'>
@@ -45,25 +46,52 @@ class AdminClass
                                 <label for='productName' class='form-label'>Product ID</label>
                                 <input type='text' class='form-control' value='$productId' disabled>
                             </div>
-        
-                            <div class='mb-3'>
+
+                            " .
+            (!$editProduct ?
+                "<div class='mb-3'>
                                 <label for='productName' class='form-label'>Product Name</label>
                                 <input type='text' class='form-control' value='$productName' disabled>
-                            </div>
+                            </div>"
+                :
+                "<div class='mb-3'>
+                                <label for='productName' class='form-label'>Product Name</label>
+                                <input type='text' class='form-control' id='productName' name='productName'
+                                    placeholder='Enter product name' value='$productName' required>
+                            </div>")
+            . "
 
-                            <div class='mb-3'>
+            " .
+            (!$editProduct ?
+                "<div class='mb-3'>
                                 <label for='productGeneric' class='form-label'>Generic</label>
                                 <select class='form-select' disabled>
                                     <option selected>{$genericBrand}</option>';
                                 </select>
-                            </div>
+                            </div>"
+                :
+                "<div class='mb-3' id='newGenericDiv'>
+                                <label for='newGenericName' class='form-label'>Generic Name</label>
+                                <input type='text' class='form-control' id='newGenericName' name='newGenericName'
+                                    placeholder='Enter new generic name' value='$genericBrand' required>
+                            </div>"
+            ) . "
 
-                            <div class='mb-3'>
+            " .
+            (!$editProduct ?
+                "<div class='mb-3'>
                                 <label for='productCategory' class='form-label'>Category</label>
                                 <select class='form-select' disabled>
                                     <option selected>{$categoryName}</option>';
                                 </select>
-                            </div>
+                            </div>"
+                :
+                "<div class='mb-3' id='newCategory'>
+                                <label for='newCategoryName' class='form-label'>Category</label>
+                                <input type='text' class='form-control' id='newCategoryName' name='newCategoryName'
+                                    placeholder='Enter new category name' value='$categoryName' required>
+                            </div>"
+            ) . "
 
                             <div class='mb-3'>
                                 <label for='assignedBranch' class='form-label'>Assigned Branch</label>
@@ -103,7 +131,7 @@ class AdminClass
             ($isDiscardProductStock ?
                 "
                             <div class='mb-3'>
-                                <label for='productStock' class='form-label'>Discard Stock</label>
+                                <label for='productStock' class='form-label'>Discard</label>
                                 <input type='number' class='form-control' id='productStock' name='productStock'
                                     value='0' placeholder='Enter stock quantity' required>
                             </div>" : "")
@@ -167,7 +195,7 @@ class AdminClass
 
     static function getDiscardStockHistory($modalId, $productName, $productId)
     {
-        
+
         $stockHistory = RequestSQL::getAllProductHistory($productId);
         $modalContent = "<div class='modal fade' id='$modalId' tabindex='-1' aria-labelledby='stockHistoryModalLabel' aria-hidden='true'>
         <div class='modal-dialog modal-lg'>
@@ -541,6 +569,7 @@ class AdminClass
                 $modalId = 'change-modal-' . $product['id'];
                 $stockModalId = 'stock-modal-' . $product['id'];
                 $discardStockModalId = 'discard-stock-modal-' . $product['id'];
+                $editStockModalID = 'edit-stock-modal-' . $product['id'];
                 echo
                     "<tr>
                         <td class='align-content-center ps-4'>
@@ -602,8 +631,8 @@ class AdminClass
                             true
                         ) . "
 
-                            <button class='btn btn-success p-1 me-2' type='button' data-bs-toggle='modal' data-bs-target='#$stockModalId'>
-                                <small>Add Stock</small>
+                            <button class='btn btn-success p-1 me-2 ps-2 pe-2' type='button' data-bs-toggle='modal' data-bs-target='#$stockModalId'>
+                                <small>Add</small>
                             </button>
 
                             " . AdminClass::getStringModal(
@@ -624,6 +653,8 @@ class AdminClass
                             true
                         ) . "
 
+                        
+
                         <button class='btn btn-danger p-1' type='button' data-bs-toggle='modal' data-bs-target='#$discardStockModalId'>
                                 <small>Discard Stock</small>
                             </button>
@@ -632,6 +663,31 @@ class AdminClass
                     AdminClass::getDiscardStockHistory($discardStockModalId, $product['productName'], $product['id'])
                     .
                     "
+
+                    <button class='btn btn-secondary p-1 ms-2 me-2 ps-2 pe-2' type='button' data-bs-toggle='modal' data-bs-target='#$editStockModalID'>
+                                <small>Edit</small>
+                            </button>
+
+                            " . AdminClass::getStringModal(
+                            $editStockModalID,
+                            "Edit {$product['productName']} Stock",
+                            "add-stock",
+                            "{$product['id']}",
+                            "{$product['branch_id']}",
+                            "{$product['productName']}",
+                            "{$product['genericBrand']}",
+                            "{$product['productCategory']}",
+                            "{$product['branchName']}",
+                            "{$product['productStock']}",
+                            "{$product['productUnit']}",
+                            "{$product['productPrice']}",
+                            "{$product['productImage']}",
+                            "{$product['barCode']}",
+                            false,
+                            false,
+                            false,
+                            true
+                        ) . "
                             
                         </td>
 
@@ -740,6 +796,10 @@ class BranchClass
                 $products = RequestSQL::getAllProductIDS($row['product_ordered_list']);
                 $all_products = '';
 
+                $createdAt = new DateTime($row['createdAt']);
+                $currentDate = new DateTime();
+                $interval = $currentDate->diff($createdAt);
+
                 foreach ($products as $product) {
                     $all_products .= "<tr>";
                     $all_products .= "<td class='align-content-center ps-4'><span>" . htmlspecialchars($product['branchName']) . "</span></td>";
@@ -752,6 +812,7 @@ class BranchClass
 
                 $all_transaction = '';
                 foreach ($products as $product) {
+                    $max_product = ($product['productStock'] + $product['numberProduct']);
                     $all_transaction .= "
                     <tr>
                         <td>{$product['productId']}</td>
@@ -760,7 +821,7 @@ class BranchClass
                         <td>
                             <input type='hidden' class='form-control' name='itemId[]' value='{$product['id']}'>
                             <input type='hidden' class='form-control' name='productIds[]' value='{$product['productId']}'>
-                            <input type='number' class='form-control' name='itemQuantity[]' value='{$product['numberProduct']}' min='0' max='{$product['productStock']}' required>
+                            <input type='number' class='form-control' name='itemQuantity[]' value='{$product['numberProduct']}' min='1' max='$max_product' required>
                         </td>
                         <td>₱ {$product['productPrice']}</td>
                     </tr>";
@@ -793,9 +854,16 @@ class BranchClass
                 </td>
                 <td class='align-content-center'>
                     <input type='hidden' id='product_ordered_list' value='" . htmlspecialchars($row['product_ordered_list']) . "'>
-                    <button class='btn btn-secondary' type='button' data-bs-toggle='modal' data-bs-target='#edit-$modalId'>
-                        <small>Edit</small>
-                    </button>
+                    " .
+
+                    ($interval->days <= 1 ?
+                        "
+                        <button class='btn btn-secondary' type='button' data-bs-toggle='modal' data-bs-target='#edit-$modalId'>
+                            <small>Edit</small>
+                        </button>
+                        " : ""
+                    )
+                    . "
                     <button class='btn btn-secondary' type='button' data-bs-toggle='modal' data-bs-target='#$modalId'>
                         <small>Details</small>
                     </button>
@@ -835,14 +903,14 @@ class BranchClass
                                         </div>
                                     
                                         <div class='ms-3 form-check'>
-                                            <input class='form-check-input' type='checkbox' value=' id='seniorDiscount'
+                                            <input class='form-check-input' type='checkbox' id='seniorDiscount' name='seniorDiscount' value='1'
                                                 " . ($row['seniorDiscount'] ? 'checked' : '') . ">
                                             <label class='form-check-label' for='seniorDiscount'>
                                                 Senior Citizen Discount
                                             </label>
                                         </div>
                                         <div class='ms-3 form-check'>
-                                            <input class='form-check-input' type='checkbox' value=' id='pwdDiscount'
+                                            <input class='form-check-input' type='checkbox' id='pwdDiscount' name='pwdDiscount' value='1'
                                                 " . ($row['pwdDiscount'] ? 'checked' : '') . ">
                                             <label class='form-check-label' for='pwdDiscount'>
                                                 Person with Disability Discount

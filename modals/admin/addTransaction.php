@@ -7,11 +7,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="createBranchForm" method="POST" action="backend/redirector.php">
+                <form id="createBranchForm" method="POST" action="backend/redirector.php" enctype="multipart/form-data">
                     <div class="mb-3">
-                        <label for="transactionFile" class="form-label">Choose File (JSON, TXT, XML)</label>
+                        <input type="hidden" name="type" value="upload-transaction">
+                        <label for="transactionFile" class="form-label">Choose File (ENC)</label>
                         <input type="file" class="form-control" id="transactionFile" name="transactionFile"
-                            accept=".json, .txt, .xml" required>
+                            accept=".enc" required>
                     </div>
                 </form>
             </div>

@@ -5,7 +5,7 @@
         "firstName": "staff1",
         "lastName": "staff",
         "email": "staff1@example.com",
-        "password": "$2y$10$P3cYZMOHMtBjkmLVRdsdkOKMVDxBrdZLjVfGL8MySTDA.Z4h9cogS",
+        "password": "$2y$10$.NsYAF.rCXv3\/V2W0cCxney4tSXTUUj6.TQoIlZXuCSsIBjx9bUgC",
         "isAdmin": 0,
         "assignedBranch": 2,
         "branchName": "San Miguel",
@@ -17,10 +17,22 @@
         "firstName": "admin",
         "lastName": "admin",
         "email": "admin@example.com",
-        "password": "$2y$10$91Q1p.QaF9ew6kDAnsscHeh.79nmpMbNydJU\/6WyCxaDXLX\/uffeG",
+        "password": "$2y$10$SHPs8sQF6AOJQ8k3cWQBMOO7Iz4q5sJSLXsOL91UUmAedJ1Y8yMra",
         "isAdmin": 1,
         "assignedBranch": 1,
         "branchName": "All Branch",
+        "userStatus": "active"
+    },
+    "staff2@example.com": {
+        "id": 3,
+        "userName": "staff2",
+        "firstName": "staff2",
+        "lastName": "staff",
+        "email": "staff2@example.com",
+        "password": "$2y$10$p0BLc06R7\/SKU756S1kI9OCt23U2AHajxcBXn3cRpIkSI8pX1Drzy",
+        "isAdmin": 0,
+        "assignedBranch": 3,
+        "branchName": "San Isidro Norte",
         "userStatus": "active"
     }
 }

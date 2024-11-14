@@ -8,10 +8,7 @@
                     Transactions Report
                 </p>
 
-                <button class="btn custom-btn-secondary m-1 mb-3 rounded" type="button" data-bs-toggle="modal"
-                    data-bs-target="#uploadTransaction">
-                    Upload Transaction
-                </button>
+                
             </div>
         </form>
     </div>

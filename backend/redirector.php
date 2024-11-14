@@ -3,11 +3,11 @@ session_start();
 require_once('./config.php');
 require_once('./database.php');
 require_once('./session.php');
+require_once('./main_req.php');
 
 
 class BranchHandler
 {
-
     static function checkOnlineStatus()
     {
         $isOnline = !(@fsockopen('www.google.com', 80) == null);
@@ -219,51 +219,36 @@ class BranchHandler
                 'pwdDiscount' => $pwdDiscount,
             ];
 
-            if ($_SESSION['online']) {
-                $productIDList = [];
-                foreach ($branchProducts as $product) {
-                    $productId = $product['product_id'];
-                    $quantity = $product['quantity'];
+            $productIDList = [];
+            foreach ($branchProducts as $product) {
+                $productId = $product['product_id'];
+                $quantity = $product['quantity'];
 
-                    $query = "INSERT INTO productOrdered (productId, numberProduct) VALUES (?, ?)";
-                    $database->prepexec($query, $productId, $quantity);
-                    $productOrderedId = $database->getLastInsertedId();
-                    $productIDList[] = $productOrderedId;
+                $query = "INSERT INTO productOrdered (productId, numberProduct) VALUES (?, ?)";
+                $database->prepexec($query, $productId, $quantity);
+                $productOrderedId = $database->getLastInsertedId();
+                $productIDList[] = $productOrderedId;
 
-                    $updateQuery = "UPDATE products SET productStock = productStock - ? WHERE id = ?";
-                    $database->prepexec($updateQuery, $quantity, $productId);
-                }
-
-                $productIDListJson = json_encode(['id' => $productIDList]);
-
-                $query = "INSERT INTO transactions (productOrderedIds, branchId, staffId, totalPrice, cashPrice, changePrice, seniorDiscount, pwdDiscount) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-                $database->prepexec(
-                    $query,
-                    $productIDListJson,
-                    $branch_id,
-                    $session->get('account')['id'],
-                    $total,
-                    $received,
-                    $change,
-                    $seniorDiscount,
-                    $pwdDiscount
-                );
-                $session->set('success-message', "Transaction saved successfully!");
-            } else {
-                $offlineTransactionsFile = '../json/offline_transactions.json';
-                $offlineTransactions = file_exists($offlineTransactionsFile)
-                    ? json_decode(file_get_contents($offlineTransactionsFile), true)
-                    : [];
-
-                $branchName = $transactionData['branchName'];
-                if (!isset($offlineTransactions[$branchName])) {
-                    $offlineTransactions[$branchName] = [];
-                }
-                $offlineTransactions[$branchName][] = $transactionData;
-                file_put_contents($offlineTransactionsFile, json_encode($offlineTransactions, JSON_PRETTY_PRINT));
-                $session->set('success-message', "Transaction saved offline for Branch $branchName. Upload when online.");
+                $updateQuery = "UPDATE products SET productStock = productStock - ? WHERE id = ?";
+                $database->prepexec($updateQuery, $quantity, $productId);
             }
+
+            $productIDListJson = json_encode(['id' => $productIDList]);
+
+            $query = "INSERT INTO transactions (productOrderedIds, branchId, staffId, totalPrice, cashPrice, changePrice, seniorDiscount, pwdDiscount) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $database->prepexec(
+                $query,
+                $productIDListJson,
+                $branch_id,
+                $session->get('account')['id'],
+                $total,
+                $received,
+                $change,
+                $seniorDiscount,
+                $pwdDiscount
+            );
+            $session->set('success-message', "Transaction saved successfully!");
         } else {
             $session->set('error-message', "Transaction error!");
         }
@@ -286,8 +271,8 @@ class BranchHandler
         $itemQuantities = $_POST['itemQuantity'] ?? [];
         $productIds = $_POST['productIds'] ?? [];
 
-        $seniorDiscount = $_POST['seniorDiscount'] ?? "0";
-        $pwdDiscount = $_POST['pwdDiscount'] ?? "0";
+        $seniorDiscount = isset($_POST['seniorDiscount']) ? "1" : "0";
+        $pwdDiscount = isset($_POST['pwdDiscount']) ? "1" : "0";
 
         $discountRate = 0;
         if ($seniorDiscount) {
@@ -381,121 +366,7 @@ class BranchHandler
         exit;
     }
 
-    // static function branchAddTransaction()
-    // {
-    //     $database = new MySQLDatabase();
-    //     $session = new Session();
 
-    //     $total = $_POST['total'];
-    //     $received = $_POST['received'];
-    //     $change = $_POST['change'];
-    //     $branchProducts = $session->get('branch-cart-product');
-
-    //     if ($branchProducts) {
-    //         $productIDList = [];
-    //         $branch_id = '1';
-
-    //         foreach ($branchProducts as $product) {
-    //             $productId = $product['product_id'];
-    //             $quantityToDeduct = $product['quantity'];
-    //             $branch_id = $product['branch_id'];
-
-    //             $productIDList[] = [
-    //                 'product_id' => $productId,
-    //                 'branch_name' => $product['branch_name'],
-    //                 'product_name' => $product['product_name'],
-    //                 'product_price' => $product['product_price'],
-    //                 'quantity' => $quantityToDeduct
-    //             ];
-    //             $modifiedStocks = [];
-    //             $totalAvailableStock = 0;
-
-    //             $checkQuery = "SELECT * FROM stockHistory 
-    //                     WHERE productId = ? 
-    //                     AND discarded = FALSE 
-    //                     AND expirationDate > NOW() 
-    //                     ORDER BY expirationDate ASC";
-    //             $checkResult = $database->prepexec($checkQuery, $productId);
-
-    //             while ($batch = $checkResult->fetch_assoc()) {
-    //                 $totalAvailableStock += $batch['remainingStock'];
-    //                 if ($totalAvailableStock >= $quantityToDeduct) {
-    //                     break;
-    //                 }
-    //             }
-
-    //             if ($totalAvailableStock < $quantityToDeduct) {
-    //                 foreach ($modifiedStocks as $stockId => $originalStock) {
-    //                     $revertQuery = "UPDATE stockHistory SET remainingStock = ? WHERE id = ?";
-    //                     $database->prepexec($revertQuery, $originalStock, $stockId);
-    //                 }
-    //                 $session->set('error-message', "Some of the product stock available is expired: {$product['product_name']}");
-    //                 header("Location: ../branch.php");
-    //                 exit;
-    //             }
-
-    //             $checkResult->data_seek(0);
-    //             while ($quantityToDeduct > 0 && $batch = $checkResult->fetch_assoc()) {
-    //                 $stockId = $batch['id'];
-    //                 $remainingStock = $batch['remainingStock'];
-    //                 $deductAmount = min($quantityToDeduct, $remainingStock);
-
-    //                 $updateQuery = "UPDATE stockHistory SET remainingStock = remainingStock - ? WHERE id = ?";
-    //                 $database->prepexec($updateQuery, $deductAmount, $stockId);
-
-    //                 // potential rollback
-    //                 if (!isset($modifiedStocks[$stockId])) {
-    //                     $modifiedStocks[$stockId] = $remainingStock;
-    //                 }
-
-    //                 $quantityToDeduct -= $deductAmount;
-    //             }
-    //         }
-
-    //         $transactionData = [
-    //             'productOrderedIds' => $productIDList,
-    //             'branchId' => $branch_id,
-    //             'branchName' => $session->get('account')['branchName'],
-    //             'staffId' => $session->get('account')['id'],
-    //             'staffUsername' => $session->get('account')['userName'],
-    //             'totalPrice' => $total,
-    //             'cashPrice' => $received,
-    //             'changePrice' => $change,
-    //         ];
-
-    //         if ($_SESSION['online']) {
-    //             $productIDListJson = json_encode(['id' => array_column($productIDList, 'product_id')]);
-    //             $query = "
-    //                 INSERT INTO transactions (productOrderedIds, branchId, staffId, totalPrice, cashPrice, changePrice) 
-    //                     VALUES (?, ?, ?, ?, ?, ?)";
-    //             $database->prepexec($query, $productIDListJson, $branch_id, $session->get('account')['id'], $total, $received, $change);
-    //             $session->set('success-message', "Transaction saved successfully!");
-    //         } else {
-    //             $offlineTransactionsFile = '../json/offline_transactions.json';
-    //             $offlineTransactions = file_exists($offlineTransactionsFile)
-    //                 ? json_decode(file_get_contents($offlineTransactionsFile), true)
-    //                 : [];
-
-    //             $branchName = $transactionData['branchName'];
-    //             if (!isset($offlineTransactions[$branchName])) {
-    //                 $offlineTransactions[$branchName] = [];
-    //             }
-    //             $offlineTransactions[$branchName][] = $transactionData;
-    //             file_put_contents($offlineTransactionsFile, json_encode($offlineTransactions, JSON_PRETTY_PRINT));
-    //             $session->set('success-message', "Transaction saved offline for Branch $branchName. Upload when online.");
-    //         }
-
-    //         $session->set('last_transaction', $transactionData);
-    //         $session->set('branch-cart-product', []);
-    //         $session->set('branch-pos-page', 1);
-    //         header("Location: ../branch.php");
-    //         exit;
-    //     } else {
-    //         $session->set('error-message', "Transaction error!");
-    //         header("Location: ../branch.php");
-    //         exit;
-    //     }
-    // }
 
 
     static function uploadTransaction()
@@ -827,6 +698,156 @@ class ProductHandler
         header("Location: ..{$session->get('current_url')}");
         exit;
     }
+
+
+    static function handleUploadTransaction()
+    {
+        $database = new MySQLDatabase();
+        $session = new Session();
+        $database->beginTransaction();
+
+        if (!isset($_FILES['transactionFile']) || $_FILES['transactionFile']['error'] !== UPLOAD_ERR_OK) {
+            $session->set('error-message', "No file uploaded or an upload error occurred.");
+            header('Location: ../branch.php?page=transactions');
+            exit();
+        }
+
+        $encryptedData = file_get_contents($_FILES['transactionFile']['tmp_name']);
+        $branchName = $session->get('account')['branchName'];
+        $secretKey = "lyza-drugstore-" . $branchName;
+        $decryptedData = RequestSQL::decryptConfig($encryptedData, $secretKey);
+
+        if (!$decryptedData) {
+            $session->set('error-message', "Failed to decrypt the transaction file.");
+            header('Location: ../branch.php?page=transactions');
+            exit();
+        }
+
+        $transactions = is_array($decryptedData) ? $decryptedData : json_decode($decryptedData, true);
+        if ($transactions === null || !is_array($transactions)) {
+            $session->set('error-message', "Invalid JSON format or decryption issue.");
+            header('Location: ../branch.php?page=transactions');
+            exit;
+        }
+
+        $fileId = $transactions['fileId'] ?? null;
+        if (!$fileId) {
+            $session->set('error-message', "Transaction file is missing a unique identifier.");
+            header('Location: ../branch.php?page=transactions');
+            exit;
+        }
+        $checkFileQuery = "SELECT id FROM uploadedTransactions WHERE fileId = ?";
+        $fileCheckResult = $database->prepexec($checkFileQuery, $fileId);
+        if ($fileCheckResult->num_rows > 0) {
+            $session->set('error-message', "This transaction file has already been uploaded.");
+            header('Location: ../branch.php?page=transactions');
+            exit;
+        }
+        $insertFileQuery = "INSERT INTO uploadedTransactions (fileId) VALUES (?)";
+        $database->prepexec($insertFileQuery, $fileId);
+
+        foreach ($transactions['transaction'] as $transaction) {
+            $productOrderedIds = $transaction['productOrderedIds'];
+            $branchId = (int) $transaction['branchId'];
+            $staffId = (int) $transaction['staffId'];
+            $totalPrice = (float) $transaction['totalPrice'];
+            $cashPrice = (float) $transaction['cashPrice'];
+            $changePrice = (float) $transaction['changePrice'];
+            $seniorDiscount = $transaction['seniorDiscount'];
+            $pwdDiscount = $transaction['pwdDiscount'];
+            $createdAt = $transaction['createdAt'];
+
+            foreach ($productOrderedIds as $product) {
+                $productName = $product['product_name'];
+                $productId = (int) $product['product_id'];
+                $quantityNeeded = (int) $product['quantity'];
+
+                $stockQuery = "
+                        SELECT id, remainingStock, expirationDate
+                        FROM stockHistory
+                        WHERE branchId = ? AND productId = ? AND discarded = FALSE AND remainingStock > 0
+                        ORDER BY expirationDate ASC, createdAt ASC
+                    ";
+                $stockResults = $database->prepexec($stockQuery, $branchId, $productId);
+
+                $totalAvailableStock = 0;
+                $stockUpdates = [];
+
+                while ($stockRow = $stockResults->fetch_assoc()) {
+                    $stockId = $stockRow['id'];
+                    $remainingStock = (int) $stockRow['remainingStock'];
+                    $totalAvailableStock += $remainingStock;
+
+                    $stockUpdates[] = [
+                        'id' => $stockId,
+                        'remainingStock' => $remainingStock
+                    ];
+                    if ($totalAvailableStock >= $quantityNeeded) {
+                        break;
+                    }
+                }
+
+                if ($totalAvailableStock < $quantityNeeded) {
+                    $database->rollback();
+                    $session->set('error-message', "Not enough stock for product $productName with product ID: $productId.");
+                    header('Location: ../branch.php?page=transactions');
+                    exit;
+                }
+
+                $remainingToDeduct = $quantityNeeded;
+                foreach ($stockUpdates as $stock) {
+                    if ($remainingToDeduct <= 0)
+                        break;
+
+                    $deductQuantity = min($remainingToDeduct, $stock['remainingStock']);
+                    $remainingToDeduct -= $deductQuantity;
+
+                    $updateStockQuery = "
+                        UPDATE stockHistory 
+                            SET remainingStock = remainingStock - ? 
+                            WHERE id = ?
+                        ";
+                    $database->prepexec($updateStockQuery, $deductQuantity, $stock['id']);
+                }
+            }
+
+            $productIDList = [];
+            foreach ($transaction['productOrderedIds'] as $product) {
+                $productId = $product['product_id'];
+                $quantity = $product['quantity'];
+
+                $query = "INSERT INTO productOrdered (productId, numberProduct) VALUES (?, ?)";
+                $database->prepexec($query, $productId, $quantity);
+                $productOrderedId = $database->getLastInsertedId();
+                $productIDList[] = $productOrderedId;
+
+                $updateQuery = "UPDATE products SET productStock = productStock - ? WHERE id = ?";
+                $database->prepexec($updateQuery, $quantity, $productId);
+            }
+            $productIDListJson = json_encode(['id' => $productIDList]);
+            $query = "
+                INSERT INTO transactions
+                (productOrderedIds, branchId, staffId, totalPrice, cashPrice, changePrice, createdAt, seniorDiscount, pwdDiscount) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $database->prepexec(
+                $query,
+                $productIDListJson,
+                $branchId,
+                $staffId,
+                $totalPrice,
+                $cashPrice,
+                $changePrice,
+                $createdAt,
+                $seniorDiscount,
+                $pwdDiscount
+            );
+        }
+        $database->commit();
+        $session->set('success-message', "Transactions uploaded successfully.");
+        header('Location: ../branch.php?page=transactions');
+        exit;
+    }
+
 }
 
 function login()
@@ -959,6 +980,73 @@ function changePassword()
     exit;
 }
 
+function saveConfig()
+{
+    $database = new MySQLDatabase();
+    $session = new Session();
+
+    $products = RequestSQL::getAllProductForCache(
+        $session->get('account')['branchName']
+    );
+
+    $config = [
+        "branch_target" => $session->get('account')['branchName'],
+        "account" => [
+            "id" => $session->get('account')['id'],
+            "userName" => $session->get('account')['userName'],
+        ],
+        "products" => $products,
+    ];
+
+    $secretKey = 'lyza-drugstore';
+    $encryptedConfig = RequestSQL::encryptConfig($config, $secretKey);
+    file_put_contents('config.enc', $encryptedConfig);
+
+    $session->set('success-message', "Successfully saved the config.");
+    header('Content-Type: application/octet-stream');
+    header('Content-Disposition: attachment; filename="config.enc"');
+    header('Content-Length: ' . strlen($encryptedConfig));
+    echo $encryptedConfig;
+    exit;
+}
+
+
+function forgotPassword()
+{
+    $database = new MySQLDatabase();
+    $session = new Session();
+
+    $email = $_POST['emailForgot'];
+    $enteredCode = $_POST['enterGenerated'];
+    $password = $_POST['passwordForgot'];
+    $confirmPassword = $_POST['confirmPasswordForgot'];
+
+    if ($password !== $confirmPassword) {
+        $session->set('error-message', 'Passwords do not match!');
+        header("Location: ../index.php");
+        exit;
+    }
+
+    $result = $database->prepexec("SELECT COUNT(*) FROM users WHERE email = ?", $email);
+    if ($result[0] == 0) {
+        $session->set('error-message', 'Email address not found!');
+        header("Location: ../index.php");
+        exit;
+    }
+
+    if ($_SESSION['generated_code'] != $enteredCode || $_SESSION['email'] !== $email) {
+        $session->set('error-message', 'Invalid or expired code!');
+        header("Location: ../index.php");
+        exit;
+    }
+
+    $database->prepexec("UPDATE users SET password = ? WHERE email = ?", password_hash($password, PASSWORD_DEFAULT), $email);
+    $session->set('success-message', 'Password updated successfully!');
+    header("Location: ../index.php");
+    exit;
+}
+
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $type = $_POST['type'];
@@ -966,6 +1054,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         login();
     if ($type == 'change-password')
         changePassword();
+
+    if ($type == "save-config")
+        saveConfig();
+    if ($type == "forgot-password")
+        forgotPassword();
 
     if ($type == 'add-stock')
         ProductHandler::addStock();
@@ -975,7 +1068,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($type == 'update-transaction')
         BranchHandler::updateTransaction();
     if ($type == "upload-transaction")
-        BranchHandler::uploadTransaction();
+        ProductHandler::handleUploadTransaction();
     if ($type == 'branch-stock-item')
         BranchHandler::branchAddStock();
     if ($type == "check-online-status")
@@ -988,12 +1081,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         BranchHandler::setBranchTransactionPage();
     if ($type == "branch-stock-page")
         BranchHandler::setBranchStockPage();
-    if ($type == "branch-add-cart") {
-        if ($_SESSION['online'])
-            BranchHandler::branchAddToCart();
-        else
-            BranchHandler::branchAddProductOffline($_SESSION['account']['branchName']);
-    }
+    if ($type == "branch-add-cart")
+        BranchHandler::branchAddToCart();
     if ($type == "branch-add-transaction")
         BranchHandler::branchAddTransaction();
 

@@ -52,12 +52,11 @@ $_SESSION['current_url'] = $currentUrl;
                 Please include expiry dates in dynamic table
             -->
             <?php
-            RequestSQL::getAllProductForCache(RequestSQL::getSession('account')['branchName']);
             $data = RequestSQL::getAllProduct(
                 'branch-pos',
                 null,
                 null,
-                $searchValue,
+                null,
                 null,
                 RequestSQL::getSession('account')['branchName']
             );
@@ -72,28 +71,6 @@ $_SESSION['current_url'] = $currentUrl;
                 ?>
             </div>
         </div>
-
-        <!-- This panel is an emergency panel when a product exist but cannot recognized by the system -->
-        <!-- <div class="mb-3">
-            <label for="productName" class="form-label">Product Name</label>
-            <input type="text" class="form-control" id="productName" name="productName" placeholder="Enter product name"
-                required>
-        </div>
-        <div class="d-flex">
-            <div class="mb-3 flex-fill">
-                <label for="productPrice" class="form-label">Product Price</label>
-                <input type="number" class="form-control" id="productPrice" name="productPrice"
-                    placeholder="Enter Product Price" required>
-            </div>
-            <div class="ms-3 mb-3 flex-fill">
-                <label for="productPrice" class="form-label">Expiry Date</label>
-                <input type="number" class="form-control" id="productPrice" name="productPrice"
-                    placeholder="Enter Expiry Date" required>
-            </div>
-        </div>
-        <button class='btn btn-secondary mb-3 rounded' type='submit'>Add Product</button> -->
-
-
     </div>
 </div>
 

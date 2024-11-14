@@ -2,9 +2,17 @@
 
     <!-- Search / Category Navigation -->
     <div class="card shadow p-0 bg-body-tertiary rounded border-0 mb-3">
-        <p class=" fw-bold border-start border-3 border-success px-4 ms-3 my-3">
-            Recent Transactions
-        </p>
+        <form action="" method="post">
+            <div class="input-group input-group border-0 justify-content-between p-2 pb-0">
+                <p class=" fw-bold border-start border-3 border-success px-4 mb-3 me-5 m-1 align-content-center">
+                    Transactions Report
+                </p>
+                <button class="btn btn-secondary m-1 mb-3 rounded" type="button" data-bs-toggle="modal"
+                    data-bs-target="#uploadTransaction">
+                    Upload Transaction
+                </button>
+            </div>
+        </form>
     </div>
 
     <!-- Product Grid -->
@@ -211,3 +219,4 @@
 
 </script>
 <?php include_once "modals/branch/transaction_model.php" ?>
+<?php include_once "modals/admin/addTransaction.php" ?>

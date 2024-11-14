@@ -1,5 +1,4 @@
 <style>
-    
     /*======== Globals =======================*/
 
     :root {
@@ -26,7 +25,7 @@
         width: 100%;
         z-index: 1000;
     }
-    
+
     section {
         min-height: 77dvh;
     }
@@ -35,14 +34,76 @@
         font-size: 0.70rem;
     }
 
+
+    /* Custom Modal Styles */
+    .custom-modal2 {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        overflow: auto;
+    }
+
+    .custom-modal2 .custom-modal-content {
+        background-color: #fff;
+        margin: 10px auto;
+        padding: 20px;
+        width: 90%;
+        max-width: 400px;
+        border-radius: 8px;
+        position: relative;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .custom-modal2 .custom-close-btn {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .custom-modal2 .custom-close-btn:hover {
+        color: red;
+    }
+
+    .custom-modal2 .custom-submit-btn {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .custom-modal2 .custom-submit-btn:hover {
+        background-color: #0056b3;
+    }
+
+
+
     /*======== Content =======================*/
-    
+    .forgot-class {
+        cursor: pointer;
+    }
+
+    .forgot-class:hover {
+        color: var(--green);
+    }
+
     .heading-filler {
         width: 100%;
         height: 135px;
         border: 0;
         background-color: var(--dark);
-    }   
+    }
 
     /*---------- Foot Navigation ----------*/
     .foot-nav {
@@ -305,5 +366,4 @@
         border: 1px;
         border-color: var(--green);
     }
-
 </style>

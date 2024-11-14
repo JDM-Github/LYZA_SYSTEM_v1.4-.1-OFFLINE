@@ -426,6 +426,7 @@ class RequestSQL
                 'id' => $row['id'],
                 'branchId' => $row['branchId'],
                 'barCode' => $row['barCode'],
+                'genericBrand' => $row['genericBrand'],
                 'productName' => $row['productName'],
                 'productPrice' => $row['productPrice'],
                 'productStock' => $row['productStock'],
@@ -440,6 +441,36 @@ class RequestSQL
         if (!empty($branch_target)) {
             $session->set("product-cache-{$branch_target}", $productCache);
         }
+
+        return $productCache;
+    }
+
+    static function decryptConfig($encryptedData, $key)
+    {
+        $data = base64_decode($encryptedData);
+        $ivLength = openssl_cipher_iv_length('aes-256-cbc');
+        $iv = substr($data, 0, $ivLength);
+        $encryptedData = substr($data, $ivLength);
+        return json_decode(openssl_decrypt(
+            $encryptedData,
+            'aes-256-cbc',
+            $key,
+            0,
+            $iv
+        ), true);
+    }
+
+    static function encryptConfig($data, $key)
+    {
+        $iv = random_bytes(openssl_cipher_iv_length('aes-256-cbc'));
+        $encryptedData = openssl_encrypt(
+            json_encode($data),
+            'aes-256-cbc',
+            $key,
+            0,
+            $iv
+        );
+        return base64_encode($iv . $encryptedData);
     }
 
     static function getProductsFromCache($branch_target)
@@ -619,7 +650,8 @@ class RequestSQL
                 t.changePrice AS cash_change,
                 t.createdAt AS transaction_date,
                 s.userName AS staff_acc,
-                t.productOrderedIds AS product_ordered_list
+                t.productOrderedIds AS product_ordered_list,
+                t.createdAt AS createdAt
             FROM transactions AS t
             JOIN staff st ON t.staffId = st.id
             JOIN users s ON t.staffId = s.id
@@ -649,17 +681,8 @@ class RequestSQL
 
         if ($groupBy) {
             switch ($groupBy) {
-                case 'daily':
-                    $additionalQuery .= " AND DATE(t.createdAt) = DATE(NOW())";
-                    break;
-                case 'weekly':
-                    $additionalQuery .= " AND WEEK(t.createdAt) = WEEK(NOW())";
-                    break;
                 case 'monthly':
-                    $additionalQuery .= " AND MONTH(t.createdAt) = MONTH(NOW())";
-                    break;
-                case 'semi-annually':
-                    $additionalQuery .= " AND QUARTER(t.createdAt) = QUARTER(NOW())";
+                    $additionalQuery .= " AND MONTH(t.createdAt) = MONTH(NOW()) AND YEAR(t.createdAt) = YEAR(NOW())";
                     break;
                 case 'annually':
                     $additionalQuery .= " AND YEAR(t.createdAt) = YEAR(NOW())";

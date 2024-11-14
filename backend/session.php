@@ -6,12 +6,12 @@ class Session
         $_SESSION[$key] = $value;
     }
 
-    public function get($key, $default=null)
+    public function get($key, $default = null)
     {
         return isset($_SESSION[$key]) ? $_SESSION[$key] : $default;
     }
 
-    public function getOrSet($key, $default=null)
+    public function getOrSet($key, $default = null)
     {
         if (isset($_SESSION[$key]))
             return $_SESSION[$key];
@@ -35,12 +35,16 @@ class Session
     public function destroy()
     {
         $_SESSION = [];
-        if (ini_get("session.use_cookies"))
-        {
+        if (ini_get("session.use_cookies")) {
             $params = session_get_cookie_params();
-            setcookie(session_name(), '', time() - 42000,
-                $params["path"], $params["domain"],
-                $params["secure"], $params["httponly"]
+            setcookie(
+                session_name(),
+                '',
+                time() - 42000,
+                $params["path"],
+                $params["domain"],
+                $params["secure"],
+                $params["httponly"]
             );
         }
         session_destroy();

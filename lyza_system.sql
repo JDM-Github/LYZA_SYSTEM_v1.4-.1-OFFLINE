@@ -87,6 +87,12 @@ CREATE TABLE stockHistory (
     FOREIGN KEY (productId) REFERENCES products(id) ON DELETE CASCADE
 );
 
+CREATE TABLE uploadedTransactions (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    fileId VARCHAR(255) UNIQUE NOT NULL,
+    uploadedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 INSERT INTO branch (branchName) VALUES
 ('All Branch'),
 ('San Miguel'),
