@@ -12,10 +12,18 @@
 <!--- AJAX Script | Tab switching ----->
 <script>
     $(document).ready(function () {
-        // Default Content Load
-        $('#content').load('client/client_home.php');
+        $('#content').load('client/client_products.php', function () {
+            $('#content').load('client/client_home.php', function () {
+                $('#content').on('click', 'a[page-target="home"]', function (e) {
+                    e.preventDefault();
+                    var href = $(this).attr('href');
+                    $('#content').load(`client/client_products.php?${href}`, function () {
+                        setActiveTab($('#productsTab'));
+                    });
+                });
+            });
+        });
 
-        // Navbar Tab Switching
         $('#homeTab').click(function (e) {
             e.preventDefault();
             $('#content').load('client/client_home.php', function () {
@@ -29,7 +37,6 @@
             });
             setActiveTab($(this));
         });
-
         $('#productsTab').click(function (e) {
             e.preventDefault();
             $('#content').load('client/client_products.php', function () {

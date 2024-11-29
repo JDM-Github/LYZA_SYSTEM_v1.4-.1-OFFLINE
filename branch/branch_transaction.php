@@ -1,18 +1,31 @@
 <div class="content ms-3 col-sm-11 content-section" id="transactions">
+    <div class="card shadow p-1 bg-body-tertiary rounded border-0 mb-3">
+        <div class="d-flex justify-content-between">
+            <p class="fw-bold border-start border-3 border-success px-4 m-3 mb-4">
+                Transaction Report
+            </p>
 
-    <!-- Search / Category Navigation -->
-    <div class="card shadow p-0 bg-body-tertiary rounded border-0 mb-3">
-        <form action="" method="post">
-            <div class="input-group input-group border-0 justify-content-between p-2 pb-0">
-                <p class=" fw-bold border-start border-3 border-success px-4 mb-3 me-5 m-1 align-content-center">
-                    Transactions Report
-                </p>
-                <button class="btn btn-secondary m-1 mb-3 rounded" type="button" data-bs-toggle="modal"
+            <form action="" class="border-0 d-flex m-1" method="post">
+
+                <style>
+                    .border-dark-green {
+                        background: #56AB91;
+                    }
+
+                    .border-dark-green:hover {
+                        background: #369B71;
+                    }
+                </style>
+                <button id="printChartButton" class="btn custom-btn-success me-2 mt-1 mb-1 border-dark-green"
+                    type="button" onclick="printStockHistory()">Download
+                    History</button>
+                <button class="btn btn-secondary m-1 mb-1 rounded" type="button" data-bs-toggle="modal"
                     data-bs-target="#uploadTransaction">
                     Upload Transaction
                 </button>
-            </div>
-        </form>
+            </form>
+
+        </div>
     </div>
 
     <!-- Product Grid -->
@@ -50,6 +63,7 @@
                     value="<?php echo $selectedDate; ?>">
                 <select class="form-select rounded mb-3 me-3" name="group-by" id="group-by">
                     <option value="">-- Group By --</option>
+                    <option value="weekly" <?php echo isSelected('weekly', $selectedGroup); ?>>Weekly</option>
                     <option value="monthly" <?php echo isSelected('monthly', $selectedGroup); ?>>Monthly</option>
                     <option value="annually" <?php echo isSelected('annually', $selectedGroup); ?>>Annually</option>
                 </select>
@@ -89,7 +103,7 @@
             $transactions = $data['result'];
             $currentPage = $data['page'];
             $totalPages = $data['total'];
-            BranchClass::loadAllTransaction($transactions);
+            $transactionArray = BranchClass::loadAllTransaction($transactions);
             BranchClass::loadPaginator($currentPage, $totalPages, 'branch-transaction-page');
             ?>
         </div>
@@ -99,7 +113,7 @@
 
 
 <script>
-    function printReceipt(modalId, total, cash, change, staff) {
+    function printReceipt(modalId, id, subtotal, discount, total, cash, change, staff, branchName) {
         const modalContent = document.querySelector(`#${modalId} .modal-body`).innerHTML;
 
         const printWindow = window.open('', '_blank', 'width=600,height=400');
@@ -114,9 +128,8 @@
                         padding: 20px;
                         background-color: #f4f4f4; 
                     }
-
                     .receipt {
-                        width: 320px; 
+                        width: 180px; 
                         margin: auto; 
                         text-align: center; 
                         background-color: #fff;
@@ -127,7 +140,6 @@
                     .receipt h2 {
                         margin: 0 0 10px; 
                         font-size: 14px; 
-                        font-weight: bold;
                     }
 
                     .receipt p {
@@ -139,25 +151,7 @@
                     .receipt hr {
                         border: none; 
                         border-top: 1px dashed #ccc;
-                        margin: 10px 0; 
-                    }
-
-                    .receipt table {
-                        width: 100%; 
-                        border-collapse: collapse; 
-                        font-size: 10px; 
-                        margin-top: 10px; 
-                    }
-
-                    .receipt th, .receipt td {
-                        padding: 4px; 
-                        text-align: left; 
-                        border-bottom: 1px solid #eee;
-                    }
-
-                    .receipt th {
-                        background-color: #f8f8f8;
-                        font-weight: bold; 
+                        margin: 5px 0; 
                     }
 
                     .receipt .total-section {
@@ -168,7 +162,7 @@
                         display: flex; 
                         justify-content: space-between; 
                         width: 100%;
-                        font-size: 8px; 
+                        font-size: 10px; 
                     }
 
                     .receipt .thank-you {
@@ -176,38 +170,94 @@
                         font-size: 12px; 
                         color: #777;
                     }
+                    @media print {
+                        body {
+                            font-family: 'Courier New', monospace;
+                            font-size: 10px !important;
+                        }
+                        div {
+                            text-align: left;
+                        }
+                        .space {
+                            height: 20px;
+                        }
+                        .invoice {
+                            text-align: center;
+                            font-size: 12px !important;
+                        }
+                        table {
+                          width: 100%;
+                        }
+                        th, td {
+                            font-size: 10px !important;
+                            text-align: left;
+                            font-weight: normal !important;
+                        }
+                        td.first-child {
+                            padding-top: 5px;
+                        }
+                        th {
+                            padding-top: 0;
+                            margin-top: 0;
+                            border-bottom: 1px dashed #ccc;
+                            padding-bottom: 5px;
+                        }
+                        th.price, td.price {
+                            text-align: right;
+                        }
+                    }
                 </style>
             </head>
             <body>
                 <div class="receipt">
-                    <h2>Lyza Drugmart</h2>
-                    <p>Thank you for your purchase!</p>
-                    <p><strong>Staff:</strong> ${staff}</p>
-                    <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
                     <hr>
-                    
+                    <div class='space'></div>
+                    <hr>
+                    <div class='invoice'>LYZA DRUGMART</div>
+                    <div class='invoice'>Mountain Homes</div>
+                    <div class='invoice'>Brgy ${branchName}</div>
+                    <div class='invoice'>Sto. Tomas Batangas</div>
+                    <div class='invoice'>TIN: 481-311-303</div>
+                    <hr>
+                    <div class='invoice'>SALES INVOICE</div>
+                    <hr>
+                    <div>Receipt: #${id}</div>
+                    <div>${new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}</div>
+                    <div>${staff}</div>
+                    <hr>
                     <table>
                         ${modalContent}
                     </table>
 
+                    <hr>
+
                     <div class="total-section">
                         <div class="total-item">
-                            <span>Total:</span>
-                            <span>₱${total}</span>
+                            <span>Subtotal:</span>
+                            <span>₱${parseFloat(subtotal).toFixed(2)}</span>
                         </div>
                         <div class="total-item">
-                            <span>Cash Received:</span>
-                            <span>₱${cash}</span>
+                            <span>Discount:</span>
+                            <span>₱${parseFloat(discount).toFixed(2)}</span>
+                        </div>
+                        <div class="total-item">
+                            <span>Total:</span>
+                            <span>₱${parseFloat(total).toFixed(2)}</span>
+                        </div>
+                        <div class="total-item">
+                            <span>Paid:</span>
+                            <span>₱${parseFloat(cash).toFixed(2)}</span>
                         </div>
                         <div class="total-item">
                             <span>Change:</span>
-                            <span>₱${change}</span>
+                            <span>₱${parseFloat(change).toFixed(2)}</span>
                         </div>
                     </div>
 
                     <hr>
-                    <p>Thank you for on Lyza Store!</p>
-                    <p>Visit again!</p>
+                    <p>Thank you!</p>
+                    <hr>
+                    <div class='space'></div>
                 </div>
             </body>
         </html>
@@ -220,3 +270,4 @@
 </script>
 <?php include_once "modals/branch/transaction_model.php" ?>
 <?php include_once "modals/admin/addTransaction.php" ?>
+<?php include_once "admin/script/print_transaction.php" ?>

@@ -48,15 +48,12 @@ $_SESSION['current_url'] = $currentUrl;
         </div>
 
         <div>
-            <!-- Major Change: 
-                Please include expiry dates in dynamic table
-            -->
             <?php
             $data = RequestSQL::getAllProduct(
                 'branch-pos',
                 null,
                 null,
-                null,
+                $searchValue,
                 null,
                 RequestSQL::getSession('account')['branchName']
             );
@@ -159,7 +156,7 @@ $_SESSION['current_url'] = $currentUrl;
             }
             ?>
             <span class="py-0 flex-fill fs-4 text-white">Total:</span>
-            <span class="fw-bold flex-fill fs-4 ms-0 ps-0 text-end text-white">
+            <span class="fw-bold flex-fill fs-4 ms-0 ps-0 text-end text-white" id="top-total">
                 ₱ <?php echo number_format($total, 2); ?></span>
             <div id="total-amount" style="display: none"><?php echo $total; ?></div>
         </div>
@@ -167,12 +164,8 @@ $_SESSION['current_url'] = $currentUrl;
         <div class="input-group align-content-center">
             <label class="form-label text-muted me-5 ps-2 pt-2 " for="cash-input">Cash Received:</label>
             <span class="input-group-text border-0">₱</span>
-            <input class="form-control rounded pt-2 mb-2 text-end" placeholder="00.00" id="cash-input">
-        </div>
-
-        <div class="d-flex justify-content-between">
-            <span class="text-muted ps-2">Change:</span>
-            <span id="change-display" class="text-muted text-end pe-2 mb-3">₱ 00.00</span>
+            <input type="number" min="0" class="form-control rounded pt-2 mb-2 text-end" placeholder="00.00"
+                id="cash-input">
         </div>
 
         <div class="d-flex justify-content-between">
@@ -180,23 +173,40 @@ $_SESSION['current_url'] = $currentUrl;
             <span id="discounted-total" class="text-muted text-end pe-2 mb-3">₱ 00.00</span>
         </div>
 
+        <div class="d-flex justify-content-between">
+            <span class="text-muted ps-2">Change:</span>
+            <span id="change-display" class="text-muted text-end pe-2 mb-3">₱ 00.00</span>
+        </div>
+
+
+        <div id="idNumberField" class="mt-3 mb-2" style="display: none;">
+            <label for="idNumber" class="form-label">Enter ID Number:</label>
+            <input type="number" class="form-control" id="idNumber" placeholder="Enter your ID number" required>
+        </div>
+
         <div class="p-3 bg-body-secondary rounded-4">
             <!-- Senior Citizen Discount (20% less per item) -->
             <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="seniorDiscount">
+                <input class="form-check-input" type="radio" name="discount" id="seniorDiscount" value="senior">
                 <label class="form-check-label" for="seniorDiscount">
                     Senior Citizen Discount
                 </label>
             </div>
             <!-- PWD Discount (20% less per item) -->
             <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="pwdDiscount">
+                <input class="form-check-input" type="radio" name="discount" id="pwdDiscount" value="pwd">
                 <label class="form-check-label" for="pwdDiscount">
                     Person with Disability Discount
                 </label>
             </div>
+            <!-- Senior & PWD Discount -->
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="discount" id="bothDiscount" value="both">
+                <label class="form-check-label" for="bothDiscount">
+                    Senior & PWD Discount
+                </label>
+            </div>
         </div>
-
 
         <div class="justify-content-center d-flex mt-3">
             <form method="POST" action="backend/redirector.php" onsubmit="return validateTransaction()">
@@ -243,17 +253,18 @@ $_SESSION['current_url'] = $currentUrl;
         const cashReceived = parseFloat(document.getElementById('cash-input').value) || 0;
         const seniorDiscount = document.getElementById('seniorDiscount').checked;
         const pwdDiscount = document.getElementById('pwdDiscount').checked;
+        const seniorPwdDiscount = document.getElementById('bothDiscount').checked;
 
         const seniorDiscountRate = 0.20;
         const pwdDiscountRate = 0.20;
 
         let totalAmount = originalTotalAmount;
         let discountedTotal = 0;
-        if (seniorDiscount) {
+        if (seniorDiscount || seniorPwdDiscount) {
             totalAmount -= originalTotalAmount * seniorDiscountRate;
             discountedTotal += originalTotalAmount * seniorDiscountRate;
         }
-        if (pwdDiscount) {
+        else if (pwdDiscount || seniorPwdDiscount) {
             totalAmount -= originalTotalAmount * pwdDiscountRate;
             discountedTotal += originalTotalAmount * pwdDiscountRate;
         }
@@ -262,58 +273,48 @@ $_SESSION['current_url'] = $currentUrl;
         document.getElementById('total-input').value = totalAmount.toFixed(2);
         document.getElementById('received-input').value = cashReceived.toFixed(2);
         document.getElementById('change-input').value = change.toFixed(2);
-        document.getElementById('is-pwd').value = pwdDiscount ? "1" : "0";
-        document.getElementById('is-senior').value = seniorDiscount ? "1" : '0';
+        document.getElementById('is-pwd').value = pwdDiscount || seniorPwdDiscount ? "1" : "0";
+        document.getElementById('is-senior').value = seniorDiscount || seniorPwdDiscount ? "1" : '0';
     }
 
     document.getElementById('cash-input').addEventListener('input', calculateChange);
     document.getElementById('seniorDiscount').addEventListener('change', calculateChange);
     document.getElementById('pwdDiscount').addEventListener('change', calculateChange);
+    document.getElementById('bothDiscount').addEventListener('change', calculateChange);
 
     function calculateChange() {
 
         const cashReceived = parseFloat(document.getElementById('cash-input').value) || 0;
+        if (cashReceived < 0) {
+            document.getElementById('cash-input').value = '';
+        }
         const originalTotalAmount = parseFloat(document.getElementById('total-amount').innerText) || 0;
         const seniorDiscount = document.getElementById('seniorDiscount').checked;
         const pwdDiscount = document.getElementById('pwdDiscount').checked;
+        const seniorPwdDiscount = document.getElementById('bothDiscount').checked;
 
         const seniorDiscountRate = 0.20;
         const pwdDiscountRate = 0.20;
 
-
-
         let totalAmount = originalTotalAmount;
         let discountedTotal = 0;
-        if (seniorDiscount) {
+        if (seniorDiscount || seniorPwdDiscount) {
             totalAmount -= originalTotalAmount * seniorDiscountRate;
             discountedTotal += originalTotalAmount * seniorDiscountRate;
+            document.getElementById('idNumberField').style.display = 'block';
         }
-        if (pwdDiscount) {
+        else if (pwdDiscount || seniorPwdDiscount) {
             totalAmount -= originalTotalAmount * pwdDiscountRate;
             discountedTotal += originalTotalAmount * pwdDiscountRate;
+            document.getElementById('idNumberField').style.display = 'block';
         }
 
         const change = cashReceived - totalAmount;
-
+        document.getElementById('top-total').innerText = "₱ " + totalAmount.toFixed(2);
         document.getElementById('change-display').innerText = '₱ ' + change.toFixed(2);
         document.getElementById('discounted-total').innerText = '₱ ' + discountedTotal.toFixed(2);
         updateHiddenInputs();
     }
-
-    // function calculateChange() {
-    //     const cashReceived = parseFloat(document.getElementById('cash-input').value) || 0;
-    //     const totalAmount = parseFloat(document.getElementById('total-amount').innerText) || 0;
-
-    //     const change = cashReceived - totalAmount;
-    //     document.getElementById('change-display').innerText = '₱ ' + change.toFixed(2);
-    //     updateHiddenInputs();
-    // }
-
-    // function appendToInput(value) {
-    //     const input = document.getElementById('cash-input');
-    //     input.value += value;
-    //     calculateChange();
-    // }
 
     function clearInput() {
         document.getElementById('cash-input').value = '';
@@ -325,7 +326,15 @@ $_SESSION['current_url'] = $currentUrl;
         const total = parseFloat(document.getElementById('total-amount').innerText.replace(/[₱\s,]/g, '')) || 0;
         const received = parseFloat(document.getElementById('cash-input').value) || 0;
 
-        if (received < total) {
+        const seniorDiscount = document.getElementById('seniorDiscount').checked;
+        const pwdDiscount = document.getElementById('pwdDiscount').checked;
+        const seniorPwdDiscount = document.getElementById('bothDiscount').checked;
+
+        let discount = 1;
+        if (seniorDiscount || seniorPwdDiscount || seniorPwdDiscount) {
+            discount = 0.8;
+        }
+        if (received < (total * discount)) {
             showToast('errorToast');
             return false;
         }

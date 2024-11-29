@@ -34,7 +34,7 @@ if (isset($_SESSION['success-message'])) {
     <!----- Empty Div Under Nav ----->
 </div>
 
-<section class="overflow-y-scroll overflow-x-hidden">
+<section class="overflow-y-scroll overflow-x-hidden" id="page-content">
 
     <!-- Content Container ------------------------------------------------------------------------>
     <div id="content" class="w-100 mt-4 mb-5">

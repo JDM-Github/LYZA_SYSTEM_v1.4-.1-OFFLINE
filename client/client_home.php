@@ -147,7 +147,7 @@
 
             <!----- Featured Items Row ----->
             <div class="item-grid overflow-x-hidden py-5" id="grid-content">
-                
+
             </div>
         </div>
     </div>

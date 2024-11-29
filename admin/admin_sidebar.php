@@ -3,36 +3,36 @@
         <!----- Dashboard ----->
         <a class="link-offset-2 link-underline link-underline-opacity-0 d-flex" href="admin.php" id="dashboard-tab">
             <i class="bi bi-house-door-fill m-3"></i>
-            <p class="my-3">Dashboard</p>
+            <p class="my-3"></p>
         </a><br>
 
         <!----- Reports ----->
-        <small><span class="text-muted mx-3 mb-0 p-0 d-flex ">Reports</span></small>
+        <small><span class="text-muted mx-3 mb-0 p-0 d-flex "></span></small>
         <!----- Transactions ----->
         <a class="link-offset-2 link-underline link-underline-opacity-0 d-flex" href="admin.php?page=transaction-report"
             id="transactions-tab">
             <i class="bi bi-file-earmark-text-fill m-3"></i>
-            <p class="my-3">Transactions</p>
+            <p class="my-3"></p>
         </a>
         <!----- Stock History ----->
         <a class="link-offset-2 link-underline link-underline-opacity-0 d-flex" href="admin.php?page=stock-report"
             id="stocks-tab">
             <i class="bi bi-bag-fill m-3"></i>
-            <p class="my-3">Stock</p>
+            <p class="my-3"></p>
         </a>
         <!----- Product Status ----->
         <a class="link-offset-2 link-underline link-underline-opacity-0 d-flex" href="admin.php?page=product-report"
             id="products-tab">
             <i class="bi bi-cart-fill m-3"></i>
-            <p class="my-3">Products</p>
+            <p class="my-3"></p>
         </a><br>
 
         <!----- Accounts ----->
-        <small><span class="text-muted mx-3 mb-0 p-0 d-flex ">Accounts</span></small>
+        <small><span class="text-muted mx-3 mb-0 p-0 d-flex "></span></small>
         <a class="link-offset-2 link-underline link-underline-opacity-0 d-flex" href="admin.php?page=accounts"
             id="accounts-tab">
             <i class="bi bi-people-fill m-3"></i>
-            <p class="my-3">Accounts</p>
+            <p class="my-3"></p>
         </a>
     </div>
 </div>

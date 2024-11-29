@@ -85,6 +85,7 @@
                     </select>
                     <select class="form-select rounded mb-3 me-3" name="group-by" id="group-by">
                         <option value="">-- Group By --</option>
+                        <option value="weekly" <?php echo isSelected('weekly', $selectedGroup); ?>>Weekly</option>
                         <option value="monthly" <?php echo isSelected('monthly', $selectedGroup); ?>>Monthly</option>
                         <option value="annually" <?php echo isSelected('annually', $selectedGroup); ?>>Annually</option>
                     </select>

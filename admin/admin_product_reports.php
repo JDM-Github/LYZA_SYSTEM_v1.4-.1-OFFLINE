@@ -28,10 +28,23 @@ $_SESSION['current_url'] = $currentUrl;
                     <i class="bi bi-search"></i>
                 </button>
 
-                <button class="btn btn-secondary mb-3 rounded" type="button" data-bs-toggle="modal"
+                <button class="btn btn-secondary mb-3 me-3 rounded" type="button" data-bs-toggle="modal"
                     data-bs-target="#addProductModal">
                     Add Product
                 </button>
+
+                <style>
+                    .border-dark-green {
+                        background: #56AB91;
+                    }
+
+                    .border-dark-green:hover {
+                        background: #369B71;
+                    }
+                </style>
+                <button id="printProducts" class="btn custom-btn-success mb-3 border-dark-green" type="button"
+                    onclick="printStockHistory()">Download
+                    History</button>
             </div>
         </form>
     </div>
@@ -122,7 +135,7 @@ $_SESSION['current_url'] = $currentUrl;
             $result = $data['result'];
             $currentPage = $data['page'];
             $totalPages = $data['total'];
-            AdminClass::loadAllStock($result);
+            $productArray = AdminClass::loadAllStock($result);
             BranchClass::loadPaginator($currentPage, $totalPages, 'admin-stock-page');
             ?>
         </div>
@@ -162,7 +175,7 @@ $_SESSION['current_url'] = $currentUrl;
                             <option value="newGeneric">New Generic</option>
                         </select>
                     </div>
-                    <div class="mb-3" id="newGenericDiv" style="display: none;">
+                    <div class="mb-3" id="newGenericDivs" style="display: none;">
                         <label for="newGenericName" class="form-label">New Generic Name</label>
                         <input type="text" class="form-control" id="newGenericName" name="newGenericName"
                             placeholder="Enter new generic name">
@@ -242,9 +255,9 @@ $_SESSION['current_url'] = $currentUrl;
                             required>
                     </div>
                     <div class="mb-3">
-                        <label for="productQRCode" class="form-label">Product QR Code</label>
+                        <label for="productQRCode" class="form-label">Product Barcode Code</label>
                         <input type="text" class="form-control" id="productQRCode" name="productQRCode"
-                            placeholder="Scan QR code" required>
+                            placeholder="Scan Barcode code" required>
                     </div>
                 </form>
             </div>
@@ -255,17 +268,6 @@ $_SESSION['current_url'] = $currentUrl;
         </div>
     </div>
 </div>
-
-<script>
-    // const productQRCodeInput = document.getElementById('productQRCode');
-
-    // // DETECT THE QR CODE (TEST NIO NALANG)
-    // productQRCodeInput.addEventListener('input', function (event) {
-    //     const scannedData = event.target.value;
-    //     // alert("Scanned QR Code Data:", scannedData);
-    //     productQRCodeInput.value = scannedData;
-    // });
-</script>
 
 <script>
     function toggleNewCategoryDiv() {
@@ -280,7 +282,7 @@ $_SESSION['current_url'] = $currentUrl;
     }
 
     function toggleNewGeneric() {
-        const newGenericDiv = document.getElementById("newGenericDiv");
+        const newGenericDiv = document.getElementById("newGenericDivs");
         const selectedGeneric = document.getElementById("productGeneric").value;
 
         if (selectedGeneric === "newGeneric") {
@@ -298,3 +300,4 @@ $_SESSION['current_url'] = $currentUrl;
         return confirmation;
     }
 </script>
+<?php include_once "admin/script/print_product.php" ?>

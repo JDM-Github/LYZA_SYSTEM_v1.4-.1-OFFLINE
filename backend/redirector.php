@@ -252,7 +252,6 @@ class BranchHandler
         } else {
             $session->set('error-message', "Transaction error!");
         }
-        $session->set('last_transaction', $transactionData);
         $session->set('branch-cart-product', []);
         $session->set('branch-pos-page', 1);
         header("Location: ../branch.php");
@@ -271,14 +270,23 @@ class BranchHandler
         $itemQuantities = $_POST['itemQuantity'] ?? [];
         $productIds = $_POST['productIds'] ?? [];
 
-        $seniorDiscount = isset($_POST['seniorDiscount']) ? "1" : "0";
-        $pwdDiscount = isset($_POST['pwdDiscount']) ? "1" : "0";
-
-        $discountRate = 0;
-        if ($seniorDiscount) {
-            $discountRate += 0.20;
+        $seniorDiscount = "";
+        $pwdDiscount = "";
+        if (isset($_POST['discount'])) {
+            $selectedDiscount = $_POST['discount'];
+            if ($selectedDiscount === 'senior') {
+                $seniorDiscount = "1";
+                $pwdDiscount = "0";
+            } elseif ($selectedDiscount === 'pwd') {
+                $seniorDiscount = "0";
+                $pwdDiscount = "1";
+            } elseif ($selectedDiscount === 'seniorAndPwd') {
+                $seniorDiscount = "1";
+                $pwdDiscount = "1";
+            }
         }
-        if ($pwdDiscount) {
+        $discountRate = 0;
+        if ($seniorDiscount || $pwdDiscount) {
             $discountRate += 0.20;
         }
         $itemTotalPrice = 0;
@@ -486,6 +494,25 @@ class BranchHandler
 
 class AdminHandler
 {
+    static function editStockDetails()
+    {
+        $database = new MySQLDatabase();
+        $session = new Session();
+
+        $product_id = $_POST['product_id'];
+        $newGenericName = $_POST['newGenericName'];
+        $productName = $_POST['productName'];
+        $newCategoryName = $_POST['newCategoryName'];
+        $productPrice = $_POST['productPrice'];
+
+        $query = "UPDATE products SET productName = ?, genericBrand = ?, productCategory = ?, productPrice = ? WHERE id = ?";
+        $database->prepexec($query, $productName, $newGenericName, $newCategoryName, $productPrice, $product_id);
+
+        $session->set('success-message', 'Product edited successfully.');
+        header("Location: ../admin.php?page=product-report");
+        exit;
+    }
+
     static function adminAddProduct()
     {
         $database = new MySQLDatabase();
@@ -1027,8 +1054,9 @@ function forgotPassword()
         exit;
     }
 
-    $result = $database->prepexec("SELECT COUNT(*) FROM users WHERE email = ?", $email);
-    if ($result[0] == 0) {
+    $result = $database->prepexec("SELECT COUNT(*) AS count FROM users WHERE email = ?", $email);
+    $row = $result->fetch_assoc();
+    if ($row['count'] == 0 || $row['count'] == NULL) {
         $session->set('error-message', 'Email address not found!');
         header("Location: ../index.php");
         exit;
@@ -1065,6 +1093,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($type == 'discard-single')
         ProductHandler::discardSingle();
 
+
     if ($type == 'update-transaction')
         BranchHandler::updateTransaction();
     if ($type == "upload-transaction")
@@ -1086,6 +1115,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($type == "branch-add-transaction")
         BranchHandler::branchAddTransaction();
 
+    if ($type == "edit-stock-details")
+        AdminHandler::editStockDetails();
     if ($type == "admin-add-product")
         AdminHandler::adminAddProduct();
     if ($type == "admin-change-price")

@@ -139,10 +139,10 @@ class RequestSQL
                     $query .= " AND YEAR(t.createdAt) = YEAR(NOW())";
                     break;
                 case 'last_monthly':
-                    $query .= " AND MONTH(t.createdAt) = MONTH(DATE_SUB(NOW(), INTERVAL 1 MONTH)) AND YEAR(t.createdAt) = YEAR(DATE_SUB(NOW(), INTERVAL 1 MONTH))";
+                    $query .= " AND MONTH(t.createdAt) = MONTH(NOW() - INTERVAL 1 MONTH) AND YEAR(t.createdAt) = YEAR(NOW())";
                     break;
                 case 'last_annually':
-                    $query .= " AND YEAR(t.createdAt) = YEAR(DATE_SUB(NOW(), INTERVAL 1 YEAR))";
+                    $query .= " AND YEAR(t.createdAt) = YEAR(NOW() - INTERVAL 1 YEAR)";
                     break;
             }
         }
@@ -155,14 +155,13 @@ class RequestSQL
         $database = new MySQLDatabase();
         $revenues = [];
 
-        for ($i = $range; $i > 0; $i--) {
+        for ($i = $range - 1; $i >= 0; $i--) {
             $query = "SELECT COALESCE(SUM(t.totalPrice), 0) AS total_price FROM transactions t WHERE ";
 
             if ($period === 'monthly') {
-                $query .= "MONTH(t.createdAt) = MONTH(DATE_SUB(NOW(), INTERVAL $i MONTH)) 
-                AND YEAR(t.createdAt) = YEAR(DATE_SUB(NOW(), INTERVAL $i MONTH))";
+                $query .= " MONTH(t.createdAt) = MONTH(NOW() - INTERVAL $i MONTH) AND YEAR(t.createdAt) = YEAR(NOW())";
             } else if ($period === 'annually') {
-                $query .= "YEAR(t.createdAt) = YEAR(DATE_SUB(NOW(), INTERVAL $i YEAR))";
+                $query .= "YEAR(t.createdAt) = YEAR(NOW() - INTERVAL $i YEAR)";
             }
 
             $result = $database->query($query);
@@ -643,6 +642,7 @@ class RequestSQL
             SELECT 
                 t.id,
                 t.branchId,
+                b.branchName AS branchName,
                 t.totalPrice AS total_amount,
                 t.seniorDiscount AS seniorDiscount,
                 t.pwdDiscount AS pwdDiscount,
@@ -650,11 +650,14 @@ class RequestSQL
                 t.changePrice AS cash_change,
                 t.createdAt AS transaction_date,
                 s.userName AS staff_acc,
+                t.seniorDiscount AS seniorDiscount,
+                t.pwdDiscount AS pwdDiscount,
                 t.productOrderedIds AS product_ordered_list,
                 t.createdAt AS createdAt
             FROM transactions AS t
             JOIN staff st ON t.staffId = st.id
             JOIN users s ON t.staffId = s.id
+            JOIN branch b ON s.assignedBranch = b.id
             WHERE 1=1";
 
         $countQuery = "
@@ -681,6 +684,9 @@ class RequestSQL
 
         if ($groupBy) {
             switch ($groupBy) {
+                case 'weekly':
+                    $additionalQuery .= " AND WEEK(t.createdAt) = WEEK(NOW()) AND MONTH(t.createdAt) = MONTH(NOW()) AND YEAR(t.createdAt) = YEAR(NOW())";
+                    break;
                 case 'monthly':
                     $additionalQuery .= " AND MONTH(t.createdAt) = MONTH(NOW()) AND YEAR(t.createdAt) = YEAR(NOW())";
                     break;
@@ -742,7 +748,8 @@ class RequestSQL
                 u.lastName AS lastName, 
                 s.quantity AS quantity,
                 p.productName AS productName,
-                b.branchName AS branchName
+                b.branchName AS branchName,
+                s.createdAt AS createdAt
             FROM stockHistory s
             JOIN users u ON u.id = s.staffId
             JOIN products p ON p.id = s.productId
@@ -775,12 +782,12 @@ class RequestSQL
                     $countQuery .= " AND DATE(s.createdAt) = DATE(NOW())";
                     break;
                 case 'weekly':
-                    $query .= " AND WEEK(s.createdAt) = WEEK(NOW())";
-                    $countQuery .= " AND WEEK(s.createdAt) = WEEK(NOW())";
+                    $query .= " AND WEEK(s.createdAt) = WEEK(NOW()) AND MONTH(s.createdAt) = MONTH(NOW()) AND YEAR(s.createdAt) = YEAR(NOW())";
+                    $countQuery .= " AND WEEK(s.createdAt) = WEEK(NOW()) AND MONTH(s.createdAt) = MONTH(NOW()) AND YEAR(s.createdAt) = YEAR(NOW())";
                     break;
                 case 'monthly':
-                    $query .= " AND MONTH(s.createdAt) = MONTH(NOW())";
-                    $countQuery .= " AND MONTH(s.createdAt) = MONTH(NOW())";
+                    $query .= " AND MONTH(s.createdAt) = MONTH(NOW()) AND YEAR(s.createdAt) = YEAR(NOW())";
+                    $countQuery .= " AND MONTH(s.createdAt) = MONTH(NOW()) AND YEAR(s.createdAt) = YEAR(NOW())";
                     break;
                 case 'semi-annually':
                     $query .= " AND QUARTER(s.createdAt) = QUARTER(NOW())";
@@ -848,12 +855,12 @@ class RequestSQL
                     $countQuery .= " AND DATE(s.createdAt) = DATE(NOW())";
                     break;
                 case 'weekly':
-                    $query .= " AND WEEK(s.createdAt) = WEEK(NOW())";
-                    $countQuery .= " AND WEEK(s.createdAt) = WEEK(NOW())";
+                    $query .= " AND WEEK(s.createdAt) = WEEK(NOW()) AND MONTH(s.createdAt) = MONTH(NOW()) AND YEAR(s.createdAt) = YEAR(NOW())";
+                    $countQuery .= " AND WEEK(s.createdAt) = WEEK(NOW()) AND MONTH(s.createdAt) = MONTH(NOW()) AND YEAR(s.createdAt) = YEAR(NOW())";
                     break;
                 case 'monthly':
-                    $query .= " AND MONTH(s.createdAt) = MONTH(NOW())";
-                    $countQuery .= " AND MONTH(s.createdAt) = MONTH(NOW())";
+                    $query .= " AND MONTH(s.createdAt) = MONTH(NOW()) AND YEAR(s.createdAt) = YEAR(NOW())";
+                    $countQuery .= " AND MONTH(s.createdAt) = MONTH(NOW()) AND YEAR(s.createdAt) = YEAR(NOW())";
                     break;
                 case 'semi-annually':
                     $query .= " AND QUARTER(s.createdAt) = QUARTER(NOW())";

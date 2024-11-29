@@ -1,11 +1,28 @@
 <div class="content ms-3 flex-fill content-section" id="stocks">
 
     <!-- Add New Product -->
-    <div class=" card shadow p-3 bg-body-tertiary rounded border-0 mb-3 ">
-        <div class=" d-flex justify-content-between align-content-center">
-            <p class="fw-bold border-start border-3 border-success px-4 my-1">
-                Branch Stock Status
+    <div class="card shadow p-1 bg-body-tertiary rounded border-0 mb-3">
+        <div class="d-flex justify-content-between">
+            <p class="fw-bold border-start border-3 border-success px-4 m-3 mb-4">
+                Branch Products
             </p>
+
+            <form action="" class="border-0 d-flex m-1" method="post">
+
+                <style>
+                    .border-dark-green {
+                        background: #56AB91;
+                    }
+
+                    .border-dark-green:hover {
+                        background: #369B71;
+                    }
+                </style>
+                <button id="printChartButton" class="btn custom-btn-success me-2 mt-1 mb-1 border-dark-green"
+                    type="button" onclick="printStockHistory()">Download
+                    History</button>
+            </form>
+
         </div>
     </div>
 
@@ -77,20 +94,22 @@
 
         <div>
             <?php
+            $branchTarget = RequestSQL::getSession('account')['branchName'];
             $data = RequestSQL::getAllProduct(
                 'branch-stock',
                 $selectedCategory,
                 $selectedStatus,
                 null,
                 $selectedArchived,
-                RequestSQL::getSession('account')['branchName']
+                $branchTarget
             );
             $result = $data['result'];
             $currentPage = $data['page'];
             $totalPages = $data['total'];
-            BranchClass::loadAllStock($result);
+            $productArray = BranchClass::loadAllStock($result);
             BranchClass::loadPaginator($currentPage, $totalPages, 'branch-stock-page');
             ?>
         </div>
     </div>
 </div>
+<?php include_once "admin/script/print_branch_product.php" ?>

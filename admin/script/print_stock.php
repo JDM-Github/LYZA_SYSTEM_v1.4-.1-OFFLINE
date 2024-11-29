@@ -14,14 +14,51 @@
         <html>
             <head>
                 <title>Print Stock History</title>
-                <style>
-                    .custom-table { width: 100%; border-collapse: collapse; }
-                    .custom-table th, .custom-table td { border: 1px solid #ddd; padding: 4px; text-align: center; }
-                    .custom-table th { background-color: #f2f2f2; }
-                </style>
+                                        <style>
+@media print {
+    @page {
+        size: auto;
+        margin: 10mm;
+    }
+
+    h3 {
+        margin: 0;
+        padding: 0;
+    }
+
+    .custom-table {
+        width: 100%;
+        font-size: 14px;
+        margin-top: 10px;
+        page-break-before: auto;
+    }
+
+    .custom-table th, .custom-table td {
+        padding: 5px 15px;
+        text-align: left;
+    }
+
+    .custom-table {
+        border: 2px solid #333;
+    }
+
+    body {
+        font-size: 14px;
+        font-family: 'Helvetica', 'Arial', sans-serif;
+    }
+
+    .no-print {
+        display: none;
+    }
+
+    .custom-table tbody tr:hover {
+        background-color: transparent;
+    }
+}
+    </style>
             </head>
             <body>
-                <h1>Stock History</h1>
+                <h3>Stock History</h3>
                 <table class="custom-table">
                     <thead>
                         <tr>

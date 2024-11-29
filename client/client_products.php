@@ -66,14 +66,6 @@ $searchValue = isset($_SESSION['client-search-value']) ? $_SESSION['client-searc
                         }
                     }
                     ?>
-
-                    <!-- <a class="flex-sm-fill text-sm-center nav-link active" aria-current="page" href="#">ALL</a>
-                    <a class="flex-sm-fill text-sm-center nav-link" href="#">MEDICINES</a>
-                    <a class="flex-sm-fill text-sm-center nav-link" href="#">SUPPLEMENTS</a>
-                    <a class="flex-sm-fill text-sm-center nav-link" href="#">PERSONAL CARE</a>
-                    <a class="flex-sm-fill text-sm-center nav-link" href="#">CONTRACEPTIVES</a>
-                    <a class="flex-sm-fill text-sm-center nav-link" href="#">BABY ESSENTIALS</a>
-                    <a class="flex-sm-fill text-sm-center nav-link" href="#">OTHER</a> -->
                 </nav>
             </div>
 
