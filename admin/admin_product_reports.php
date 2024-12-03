@@ -2,7 +2,7 @@
 $currentUrl = $_SERVER['REQUEST_URI'];
 $_SESSION['current_url'] = $currentUrl;
 ?>
-<div class="content ms-3" id="stocks">
+<div class="content ms-3" style="width: 100%" id="stocks">
 
     <!-- Add New Product -->
     <div class=" card shadow p-2 bg-body-tertiary rounded border-0 mb-3 ">
@@ -153,9 +153,9 @@ $_SESSION['current_url'] = $currentUrl;
                 <form id="addProductForm" method="POST" action="backend/redirector.php" enctype="multipart/form-data">
                     <input type="hidden" name="type" value="admin-add-product">
                     <div class="mb-3">
-                        <label for="productName" class="form-label">Product Name</label>
+                        <label for="productName" class="form-label">Brand Name</label>
                         <input type="text" class="form-control" id="productName" name="productName"
-                            placeholder="Enter product name" required>
+                            placeholder="Enter brand name" required>
                     </div>
 
                     <?php $generics = RequestSQL::getGenericBrand(); ?>

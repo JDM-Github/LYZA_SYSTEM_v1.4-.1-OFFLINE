@@ -95,14 +95,13 @@ $_SESSION['current_url'] = $currentUrl;
                 <th class="align-content-center">
                     <small><span class="text-muted">Item/s</span></small>
                 </th>
-                <th class="align-content-center">
+                <th class="align-content-center" style="display: flex; align-items: center; justify-content: center;">
                     <small><span class="text-muted">Qty.</span></small>
                 </th>
                 <th class="align-content-center">
                     <small><span class="text-muted">Amount</span></small>
                 </th>
             </tr>
-
 
             <?php $branchProducts = RequestSQL::getSession('branch-cart-product'); ?>
             <?php if ($branchProducts): ?>
@@ -112,7 +111,8 @@ $_SESSION['current_url'] = $currentUrl;
                             <small><span><?php echo htmlspecialchars($branchProd['product_name']); ?></span></small>
                         </td>
                         <td class="align-content-center">
-                            <form method="POST" action="backend/redirector.php">
+                            <form method="POST" action="backend/redirector.php"
+                                style="display: flex; align-items: center; justify-content: center;">
                                 <input type='hidden' name='type' value='branch-add-cart'>
                                 <input type="hidden" name="product_id"
                                     value="<?php echo htmlspecialchars($branchProd['product_id']); ?>">
@@ -128,8 +128,9 @@ $_SESSION['current_url'] = $currentUrl;
                                     value="<?php echo htmlspecialchars($branchProd['product_stock']); ?>">
 
                                 <button class="btn px-2 border" type="submit" name="action" value="decrement">-</button>
-                                <small><span
-                                        id="product-quantity"><?php echo htmlspecialchars($branchProd['quantity']); ?></span></small>
+                                <input type="number" name="product_quantity" id="product-quantity"
+                                    value="<?php echo htmlspecialchars($branchProd['quantity']); ?>" min="0"
+                                    class="form-control text-center mx-1 no-spinners" style="width: 60px; height: 20px;">
                                 <button class="btn px-2 border" type="submit" name="action" value="increment">+</button>
                             </form>
                         </td>
@@ -140,9 +141,8 @@ $_SESSION['current_url'] = $currentUrl;
                     </tr>
                 <?php endforeach; ?>
             <?php endif; ?>
-
-
         </table>
+
     </div>
 
     <div class="mt-3">
@@ -200,7 +200,7 @@ $_SESSION['current_url'] = $currentUrl;
                 </label>
             </div>
             <!-- Senior & PWD Discount -->
-            <div class="form-check">
+            <div class="form-check" style="display: none">
                 <input class="form-check-input" type="radio" name="discount" id="bothDiscount" value="both">
                 <label class="form-check-label" for="bothDiscount">
                     Senior & PWD Discount
@@ -216,6 +216,7 @@ $_SESSION['current_url'] = $currentUrl;
                 <input type="hidden" id="change-input" name="change" value="0">
                 <input type="hidden" id="is-senior" name="is-senior" value="0">
                 <input type="hidden" id="is-pwd" name="is-pwd" value="0">
+                <input type="hidden" id="id-disability" name="id-disability" value="">
                 <button class="btn flex-fill rounded border-1 custom-receipt-btn py-2 fs-4 px-5" type="submit">Save
                     Order</button>
             </form>
@@ -224,14 +225,34 @@ $_SESSION['current_url'] = $currentUrl;
     </div>
 </div>
 
-<div id="errorToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive"
-    aria-atomic="true" style="position: absolute; top: 20px; right: 20px; display: none;">
+<div id="errorToast" class="toast align-items-center border-0 shadow-lg" role="alert" aria-live="assertive"
+    aria-atomic="true"
+    style="position: fixed; top: 20px; right: 20px; display: none; min-width: 300px; padding: 16px; background-color: #f8d7da; color: #842029; font-size: 1rem; border-radius: 8px; border-left: 8px solid #dc3545;">
     <div class="d-flex">
-        <div class="toast-body">Insufficient Cash Received!</div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" aria-label="Close"
-            onclick="closeToast('errorToast')"></button>
+        <div class="toast-body" style="flex-grow: 1;">
+            <strong>Error:</strong> Insufficient Cash Received!
+        </div>
+        <button type="button" class="btn-close btn-close-dark me-2 m-auto" aria-label="Close"
+            style="transform: scale(1.2);" onclick="closeToast('errorToast')">
+        </button>
     </div>
 </div>
+
+
+<div id="discountError" class="toast align-items-center border-0 shadow-lg" role="alert" aria-live="assertive"
+    aria-atomic="true"
+    style="position: fixed; top: 20px; right: 20px; display: none; min-width: 300px; padding: 16px; background-color: #f8d7da; color: #842029; font-size: 1rem; border-radius: 8px; border-left: 8px solid #dc3545;">
+    <div class="d-flex">
+        <div class="toast-body" style="flex-grow: 1;">
+            <strong>Error:</strong> Please enter a ID for Senior / PWD discount.
+        </div>
+        <button type="button" class="btn-close btn-close-dark me-2 m-auto" aria-label="Close"
+            style="transform: scale(1.2);" onclick="closeToast('errorToast')">
+        </button>
+    </div>
+</div>
+
+
 
 
 <script>
@@ -255,6 +276,8 @@ $_SESSION['current_url'] = $currentUrl;
         const pwdDiscount = document.getElementById('pwdDiscount').checked;
         const seniorPwdDiscount = document.getElementById('bothDiscount').checked;
 
+        const idNumber = document.getElementById('idNumber').value;
+
         const seniorDiscountRate = 0.20;
         const pwdDiscountRate = 0.20;
 
@@ -275,12 +298,14 @@ $_SESSION['current_url'] = $currentUrl;
         document.getElementById('change-input').value = change.toFixed(2);
         document.getElementById('is-pwd').value = pwdDiscount || seniorPwdDiscount ? "1" : "0";
         document.getElementById('is-senior').value = seniorDiscount || seniorPwdDiscount ? "1" : '0';
+        document.getElementById('id-disability').value = idNumber;
     }
 
     document.getElementById('cash-input').addEventListener('input', calculateChange);
     document.getElementById('seniorDiscount').addEventListener('change', calculateChange);
     document.getElementById('pwdDiscount').addEventListener('change', calculateChange);
     document.getElementById('bothDiscount').addEventListener('change', calculateChange);
+    document.getElementById('idNumber').addEventListener('change', calculateChange);
 
     function calculateChange() {
 
@@ -326,18 +351,25 @@ $_SESSION['current_url'] = $currentUrl;
         const total = parseFloat(document.getElementById('total-amount').innerText.replace(/[₱\s,]/g, '')) || 0;
         const received = parseFloat(document.getElementById('cash-input').value) || 0;
 
+        const idNumber = document.getElementById('idNumber').value;
+
         const seniorDiscount = document.getElementById('seniorDiscount').checked;
         const pwdDiscount = document.getElementById('pwdDiscount').checked;
         const seniorPwdDiscount = document.getElementById('bothDiscount').checked;
 
         let discount = 1;
         if (seniorDiscount || seniorPwdDiscount || seniorPwdDiscount) {
+            if (idNumber === "") {
+                showToast('discountError');
+                return false;
+            }
             discount = 0.8;
         }
         if (received < (total * discount)) {
             showToast('errorToast');
             return false;
         }
+
         return true;
     }
 

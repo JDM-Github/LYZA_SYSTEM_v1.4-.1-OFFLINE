@@ -1,4 +1,4 @@
-<div class="content ms-3">
+<div class="content ms-3" style="width: 100%">
     <div id="main-content">
         <div class=" card shadow p-2 bg-body-tertiary rounded border-0 mb-3 ">
             <form action="" method="post">

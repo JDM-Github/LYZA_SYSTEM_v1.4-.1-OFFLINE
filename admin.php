@@ -31,13 +31,14 @@ if (isset($_SESSION['success-message'])) {
 
     <!-- Main Layout -->
     <div class="container">
-        <div class="custom-content-wrapper my-3">
+        <div class="custom-content-wrapper my-3 d-flex">
 
             <!-- Sidebar -->
             <?php include "admin/admin_sidebar.php"; ?>
 
             <?php
             $page = isset($_GET['page']) ? $_GET['page'] : 'transaction';
+            // physical-count
             switch ($page) {
                 case 'transaction-report':
                     include "admin/admin_transactions.php";
@@ -47,6 +48,9 @@ if (isset($_SESSION['success-message'])) {
                     break;
                 case 'product-report':
                     include "admin/admin_product_reports.php";
+                    break;
+                case 'physical-count':
+                    include "admin/admin_physical_count.php";
                     break;
                 case 'accounts':
                     include "admin/admin_accounts.php";

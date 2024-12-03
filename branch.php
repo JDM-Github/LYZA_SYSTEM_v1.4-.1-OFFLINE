@@ -39,6 +39,9 @@ if (isset($_SESSION['success-message'])) {
                 case 'stocks':
                     include "branch/branch_stock.php";
                     break;
+                case 'counts':
+                    include "branch/branch_physical_count.php";
+                    break;
                 case 'pos':
                 default:
                     include "branch/branch_pos.php";

@@ -18,10 +18,33 @@ class BranchHandler
     static function setBranchPosPage()
     {
         $page = $_POST["page"];
+
         $session = new Session();
         $session->set('branch-pos-page', (int) $page);
+
         header("Location: ../branch.php");
         exit;
+    }
+
+    static function addPhysicalCount()
+    {
+        $brandName = $_POST['brandName'];
+        $genericName = $_POST['genericName'];
+        $expiryDate = $_POST['expiryDate'] ?: null;
+        $quantity = (int) $_POST['quantity'];
+        $staffId = $_SESSION['account']['id'];
+        $branchId = $_SESSION['account']['assignedBranch'];
+
+        $database = new MySQLDatabase();
+        $session = new Session();
+
+        $query = "
+            INSERT INTO physicalCount (brandName, genericName, expiryDate, productStock, branchId, staffId)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ";
+        $database->prepexec($query, $brandName, $genericName, $expiryDate, $quantity, $branchId, $staffId);
+        $session->set('success-message', "Physical saved successfully!");
+        header("Location: ../branch.php?page=counts");
     }
 
     static function setBranchTransactionPage()
@@ -30,6 +53,23 @@ class BranchHandler
         $session = new Session();
         $session->set('branch-transaction-page', (int) $page);
         header("Location: ../branch.php?page=transactions");
+        exit;
+    }
+
+    static function setBranchPhysicalPage()
+    {
+        $page = $_POST["page"];
+        $session = new Session();
+        $session->set('branch-physical-page', (int) $page);
+        header("Location: ../branch.php?page=counts");
+        exit;
+    }
+    static function setAdminPhysicalPage()
+    {
+        $page = $_POST["page"];
+        $session = new Session();
+        $session->set('admin-physical-page', (int) $page);
+        header("Location: ../admin.php?page=physical-count");
         exit;
     }
 
@@ -48,9 +88,22 @@ class BranchHandler
         $branchProducts = $session->getOrSet('branch-cart-product', []);
         $productExists = false;
 
+
         $productStock = $_POST['product_stock'];
+        $product_quantity = $_POST['product_quantity'] ?? 1;
         foreach ($branchProducts as $key => &$product) {
             if ($product['product_id'] == $_POST['product_id']) {
+                if ($product['quantity'] != $product_quantity) {
+                    $product['quantity'] = $product_quantity;
+
+                    if ($product['quantity'] > $productStock)
+                        $product['quantity'] = $productStock;
+                    $productExists = true;
+                    break;
+                }
+                if ($product['quantity'] > $productStock)
+                    $product['quantity'] = $productStock;
+
                 if (isset($_POST['action']) && $_POST['action'] === 'increment') {
                     if ($product['quantity'] < $productStock)
                         $product['quantity'] += 1;
@@ -151,6 +204,7 @@ class BranchHandler
         $change = $_POST['change'];
         $seniorDiscount = $_POST['is-senior'];
         $pwdDiscount = $_POST['is-pwd'];
+        $discountID = $_POST['id-disability'];
 
         $branchProducts = $session->get('branch-cart-product');
 
@@ -215,6 +269,7 @@ class BranchHandler
                 'totalPrice' => $total,
                 'cashPrice' => $received,
                 'changePrice' => $change,
+                'discountID' => $discountID,
                 'seniorDiscount' => $seniorDiscount,
                 'pwdDiscount' => $pwdDiscount,
             ];
@@ -235,8 +290,8 @@ class BranchHandler
 
             $productIDListJson = json_encode(['id' => $productIDList]);
 
-            $query = "INSERT INTO transactions (productOrderedIds, branchId, staffId, totalPrice, cashPrice, changePrice, seniorDiscount, pwdDiscount) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $query = "INSERT INTO transactions (productOrderedIds, branchId, staffId, totalPrice, cashPrice, changePrice, discountID, seniorDiscount, pwdDiscount) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $database->prepexec(
                 $query,
                 $productIDListJson,
@@ -245,6 +300,7 @@ class BranchHandler
                 $total,
                 $received,
                 $change,
+                $discountID,
                 $seniorDiscount,
                 $pwdDiscount
             );
@@ -279,9 +335,6 @@ class BranchHandler
                 $pwdDiscount = "0";
             } elseif ($selectedDiscount === 'pwd') {
                 $seniorDiscount = "0";
-                $pwdDiscount = "1";
-            } elseif ($selectedDiscount === 'seniorAndPwd') {
-                $seniorDiscount = "1";
                 $pwdDiscount = "1";
             }
         }
@@ -519,6 +572,7 @@ class AdminHandler
         $session = new Session();
 
         $productName = $_POST["productName"];
+
         $productGeneric = $_POST["productGeneric"];
         if ($productGeneric == "newGeneric") {
             $productGeneric = $_POST["newGenericName"];
@@ -535,6 +589,22 @@ class AdminHandler
         $productStock = $_POST["productStock"];
         $expirationDate = $_POST["expirationDate"];
 
+        $productName = strtolower($productName);
+
+        $query = "
+            SELECT COUNT(*) AS productCount 
+            FROM products 
+            WHERE LOWER(productName) = ? AND branchId = ?";
+
+        $result = $database->prepexec($query, strtolower($productName), $assignedBranch);
+        $row = $result->fetch_assoc();
+        $existingProductCount = $row['productCount'];
+
+        if ($existingProductCount > 0) {
+            $session->set('error-message', 'A product with the same brand already exists.');
+            header("Location: ../admin.php?page=product-report");
+            exit;
+        }
 
         $uploadDir = '../img/';
         $productImage = null;
@@ -551,7 +621,6 @@ class AdminHandler
                 exit;
             }
         }
-
         $query = "
         INSERT INTO products 
         (branchId, barCode, genericBrand, productStock, productName, productPrice, productUnit, productCategory, productImage) 
@@ -1093,7 +1162,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($type == 'discard-single')
         ProductHandler::discardSingle();
 
-
+    if ($type == 'add-physical-count')
+        BranchHandler::addPhysicalCount();
     if ($type == 'update-transaction')
         BranchHandler::updateTransaction();
     if ($type == "upload-transaction")
@@ -1108,6 +1178,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         BranchHandler::setBranchPosPage();
     if ($type == "branch-transaction-page")
         BranchHandler::setBranchTransactionPage();
+    if ($type == "branch-physical-page")
+        BranchHandler::setBranchPhysicalPage();
+    if ($type == "admin-physical-page")
+        BranchHandler::setAdminPhysicalPage();
     if ($type == "branch-stock-page")
         BranchHandler::setBranchStockPage();
     if ($type == "branch-add-cart")

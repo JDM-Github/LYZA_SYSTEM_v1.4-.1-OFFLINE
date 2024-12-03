@@ -4,7 +4,7 @@
         <div class="card shadow p-1 bg-body-tertiary rounded border-0 mb-3">
             <div class="d-flex justify-content-between">
                 <p class="fw-bold border-start border-3 border-success px-4 m-3 mb-3">
-                    Inventory
+                    Physical Count Table
                 </p>
 
                 <form action="" class="border-0 d-flex m-1" method="post">
@@ -19,7 +19,7 @@
                         }
                     </style>
                     <button id="printChartButton" class="btn custom-btn-success ms-3 border-dark-green" type="button"
-                        onclick="printStockHistory()">Download
+                        onclick="printPhysicalCount()">Download
                         History</button>
                 </form>
 
@@ -99,52 +99,23 @@
 
             <div>
                 <?php
-                $data = RequestSQL::getAllStockHistory($selectedBranch, $selectedStaff, $selectedGroup);
-                $histories = $data['result'];
+                $data = RequestSQL::getAllPhysicalCount(
+                    null,
+                    $selectedStaff,
+                    $selectedBranch,
+                    $selectedGroup,
+                );
+                $result = $data['result'];
                 $currentPage = $data['page'];
                 $totalPages = $data['total'];
-                AdminClass::loadAllStockHistory($histories);
-                BranchClass::loadPaginator($currentPage, $totalPages, 'admin-stock-history-page');
-
-                $histories = RequestSQL::getAllStockAdmin($selectedBranch, $selectedStaff);
-                $historiesArray = [];
-                while ($row = $histories->fetch_assoc()) {
-                    $historiesArray[] = $row;
-                }
+                $physicalArray = BranchClass::loadAllPhysicalCounts($result);
+                BranchClass::loadPaginator($currentPage, $totalPages, 'admin-physical-page');
                 ?>
             </div>
 
         </div>
     </div>
 </div>
-
-<script>
-
-    const ctx = document.getElementById('stockChart').getContext('2d');
-    const myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Overall Stock', 'Overall Demand'],
-            datasets: [{
-                label: 'Rate',
-                data: [12, 19],
-
-                backgroundColor: [
-                    '#EE6055'
-                ],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-</script>
 
 <div id="errorToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive"
     aria-atomic="true" style="position: absolute; top: 20px; right: 20px; display: none;">
@@ -155,4 +126,7 @@
     </div>
 </div>
 
-<?php include_once "admin/script/print_stock.php" ?>
+
+<?php
+include_once "admin/script/print_physical.php";
+?>

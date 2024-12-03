@@ -53,20 +53,49 @@ class RequestSQL
         return $stockHistory;
     }
 
+    static function getExpiringProducts($stockHistory)
+    {
+        $expiringProducts = [];
+        $today = new DateTime();
+
+        foreach ($stockHistory as $history) {
+            $expDate = new DateTime($history['expirationDate']);
+            $interval = $today->diff($expDate);
+
+            if ($expDate < $today || ($interval->m < 1 && $interval->d <= 30)) {
+                $expiringProducts[] = $history;
+            }
+        }
+
+        return $expiringProducts;
+    }
+
     static function getAllStockHistories()
     {
         $database = new MySQLDatabase();
         $query = "
-            SELECT * FROM stockHistory 
-            WHERE discarded = FALSE 
-            AND remainingStock > 0
-            AND expirationDate IS NOT NULL 
-            ORDER BY expirationDate ASC
+            SELECT 
+                stockHistory.id AS stockHistoryId,
+                stockHistory.branchId,
+                stockHistory.expirationDate,
+                stockHistory.remainingStock,
+                products.productName,
+                products.productCategory,
+                products.productUnit,
+                branch.branchName
+            FROM stockHistory
+            JOIN products ON stockHistory.productId = products.id
+            JOIN branch ON stockHistory.branchId = branch.id
+            WHERE stockHistory.discarded = FALSE 
+            AND stockHistory.remainingStock > 0
+            AND stockHistory.expirationDate IS NOT NULL 
+            ORDER BY stockHistory.expirationDate ASC
         ";
         $result = $database->query($query);
         $stockHistory = $result->fetch_all(MYSQLI_ASSOC);
         return $stockHistory;
     }
+
 
     static function getAllProductExpired($stockHistory)
     {
@@ -239,6 +268,27 @@ class RequestSQL
         return array_reverse($stockHistory);
     }
 
+    static function getStockPortions()
+    {
+        $database = new MySQLDatabase();
+
+        $queryLowStock = "SELECT COUNT(*) AS lowStockCount FROM products WHERE productStock <= 10 AND productStock > 0";
+        $queryOutOfStock = "SELECT COUNT(*) AS outOfStockCount FROM products WHERE productStock = 0";
+        $queryGoodStock = "SELECT COUNT(*) AS goodStockCount FROM products WHERE productStock > 10";
+
+        $lowStock = $database->query($queryLowStock)->fetch_assoc()['lowStockCount'] ?? 0;
+        $outOfStock = $database->query($queryOutOfStock)->fetch_assoc()['outOfStockCount'] ?? 0;
+        $goodStock = $database->query($queryGoodStock)->fetch_assoc()['goodStockCount'] ?? 0;
+
+        return [
+            'Out of Stock' => $outOfStock,
+            'Critical Stock' => $lowStock,
+            'Good Stock' => $goodStock,
+        ];
+    }
+
+
+
     static function getCategoryDistribution()
     {
         $database = new MySQLDatabase();
@@ -281,14 +331,23 @@ class RequestSQL
     static function getOutOfStockItems()
     {
         $database = new MySQLDatabase();
-        $query = "SELECT COUNT(*) AS lowStockCount FROM products WHERE productStock = 0";
+        $query = "
+        SELECT 
+            products.productName,
+            products.productCategory,
+            branch.branchName,
+            products.productUnit,
+            products.barCode
+        FROM products
+        JOIN branch ON products.branchId = branch.id
+        WHERE products.productStock = 0
+    ";
         $result = $database->query($query);
 
         if ($result) {
-            $row = $result->fetch_assoc();
-            return (int) $row['lowStockCount'];
+            return $result->fetch_all(MYSQLI_ASSOC);
         } else {
-            return 0;
+            return [];
         }
     }
 
@@ -329,7 +388,7 @@ class RequestSQL
                 $branch['status'] != $status ||
                 $branch['search'] != $search ||
                 $branch['archived'] != $archived ||
-                $branch['branch'] != $archived
+                $branch['branch'] != $branch_target
             ) {
                 $session->set($br . '-page', 1);
             }
@@ -346,7 +405,11 @@ class RequestSQL
     static function getAllProductIDS($ids)
     {
         $productOrderedIds = json_decode($ids, true)['id']; // [1, 2]
-        $parameters = str_repeat('?,', count($productOrderedIds) - 1) . '?';
+        if (empty($productOrderedIds)) {
+            return [];
+        } else {
+            $parameters = str_repeat('?,', count($productOrderedIds) - 1) . '?';
+        }
 
         $database = new MySQLDatabase();
 
@@ -494,9 +557,9 @@ class RequestSQL
     ) {
         $session = new Session();
         $database = new MySQLDatabase();
-
         RequestSQL::setBranchPage($branch, $category, $status, $search, $archived, $branch_target);
         $page = $session->getOrSet($branch . '-page', 1);
+
         if ($limit)
             $target_limit = $limit;
         else
@@ -528,6 +591,116 @@ class RequestSQL
             $search = $database->escape($search);
             $additionalQuery .= " AND (productName LIKE '%$search%' OR productDescription LIKE '%$search%'
                 OR genericBrand LIKE '%$search%' OR barCode LIKE '%$search%')";
+        }
+
+        if ($status) {
+            if ($status == 'good') {
+                $additionalQuery .= " AND productStock > 10";
+            } elseif ($status == 'critical') {
+                $additionalQuery .= " AND productStock <= 10 AND productStock > 0";
+            } elseif ($status == 'out-of-stock') {
+                $additionalQuery .= " AND productStock = 0";
+            }
+        }
+        $query .= $additionalQuery;
+        $countQuery .= $additionalQuery;
+
+        if ($limit)
+            $query .= " LIMIT $target_limit OFFSET $offset";
+
+        $result = $database->query($query);
+        $totalPages = RequestSQL::getCountQuery($countQuery, $target_limit);
+
+        return [
+            'result' => $result,
+            'page' => $page,
+            'total' => $totalPages
+        ];
+    }
+
+    static function getAllPhysicalCount(
+        $status = null,
+        $staff = null,
+        $branch_target = null,
+        $groupBy = null,
+        $search = null,
+        $limit = 7
+    ) {
+        $branch = 'branch-physical';
+        $session = new Session();
+        $database = new MySQLDatabase();
+
+        if ($session->has($branch)) {
+            $branchItem = ($session->get($branch));
+            if (
+                $branchItem['status'] != $status ||
+                $branchItem['search'] != $search ||
+                $branchItem['staff'] != $staff ||
+                $branchItem['groupBy'] != $groupBy ||
+                $branchItem['branch'] != $branch_target
+            ) {
+                $session->set($branch . '-page', 1);
+            }
+        }
+        $session->set($branch, [
+            'status' => $status,
+            'staff' => $staff,
+            'search' => $search,
+            'groupBy' => $groupBy,
+            'branch' => $branch_target,
+        ]);
+
+        $page = $session->getOrSet($branch . '-page', 1);
+        if ($limit)
+            $target_limit = $limit;
+        else
+            $target_limit = 999;
+        $offset = ($page - 1) * $target_limit;
+
+        $query = "SELECT p.*, b.id AS branch_id, b.branchName, u.id AS userId, u.userName FROM physicalCount p 
+            JOIN branch b ON p.branchId = b.id JOIN users u ON u.id = p.staffId WHERE 1=1";
+        $countQuery = "SELECT COUNT(*) AS total FROM physicalCount p 
+            JOIN branch b ON p.branchId = b.id JOIN users u ON u.id = p.staffId WHERE 1=1";
+
+        $additionalQuery = "";
+
+        if ($staff) {
+            $staff = $database->escape($staff);
+            $additionalQuery .= " AND u.id = '$staff'";
+        }
+
+        if ($branch_target) {
+            $branch_target = $database->escape($branch_target);
+            $additionalQuery .= " AND b.id = '$branch_target'";
+        }
+
+        if ($search) {
+            $search = $database->escape($search);
+            $additionalQuery .= " AND (brandName LIKE '%$search%'
+                OR genericBrand LIKE '%$search%')";
+        }
+
+        if ($groupBy) {
+            switch ($groupBy) {
+                case 'weekly':
+                    $additionalQuery .= " AND WEEK(p.createdAt) = WEEK(NOW()) AND MONTH(p.createdAt) = MONTH(NOW()) AND YEAR(p.createdAt) = YEAR(NOW())";
+                    break;
+                case 'monthly':
+                    $additionalQuery .= " AND MONTH(p.createdAt) = MONTH(NOW()) AND YEAR(p.createdAt) = YEAR(NOW())";
+                    break;
+                case 'annually':
+                    $additionalQuery .= " AND YEAR(p.createdAt) = YEAR(NOW())";
+                    break;
+                case 'lm1':
+                    $additionalQuery .= " AND MONTH(p.createdAt) = MONTH(NOW()) - 1 AND YEAR(p.createdAt) = YEAR(NOW())";
+                    break;
+                case 'lm2':
+                    $additionalQuery .= " AND MONTH(p.createdAt) = MONTH(NOW()) - 2 AND MONTH(NOW()) AND YEAR(p.createdAt) = YEAR(NOW())";
+                    break;
+                case 'lm3':
+                    $additionalQuery .= " AND MONTH(p.createdAt) = MONTH(NOW()) - 3 AND MONTH(NOW()) AND YEAR(p.createdAt) = YEAR(NOW())";
+                    break;
+            }
         }
 
         if ($status) {
@@ -610,7 +783,8 @@ class RequestSQL
         $order = null,
         $staff = null,
         $target = 'branch',
-        $branch_target = null
+        $branch_target = null,
+        $limit = 7
     ) {
         $session = new Session();
         $database = new MySQLDatabase();
@@ -635,7 +809,6 @@ class RequestSQL
             'staff' => $staff,
         ]);
         $page = $session->getOrSet($target . '-transaction-page', 1);
-        $limit = 7;
         $offset = ($page - 1) * $limit;
 
         $query = "
@@ -650,6 +823,7 @@ class RequestSQL
                 t.changePrice AS cash_change,
                 t.createdAt AS transaction_date,
                 s.userName AS staff_acc,
+                t.discountID AS discountID,
                 t.seniorDiscount AS seniorDiscount,
                 t.pwdDiscount AS pwdDiscount,
                 t.productOrderedIds AS product_ordered_list,
@@ -692,6 +866,15 @@ class RequestSQL
                     break;
                 case 'annually':
                     $additionalQuery .= " AND YEAR(t.createdAt) = YEAR(NOW())";
+                    break;
+                case 'lm1':
+                    $additionalQuery .= " AND MONTH(t.createdAt) = MONTH(NOW()) - 1 AND YEAR(t.createdAt) = YEAR(NOW())";
+                    break;
+                case 'lm2':
+                    $additionalQuery .= " AND MONTH(t.createdAt) = MONTH(NOW()) - 2 AND MONTH(NOW()) AND YEAR(t.createdAt) = YEAR(NOW())";
+                    break;
+                case 'lm3':
+                    $additionalQuery .= " AND MONTH(t.createdAt) = MONTH(NOW()) - 3 AND MONTH(NOW()) AND YEAR(t.createdAt) = YEAR(NOW())";
                     break;
             }
         }
@@ -796,6 +979,18 @@ class RequestSQL
                 case 'annually':
                     $query .= " AND YEAR(s.createdAt) = YEAR(NOW())";
                     $countQuery .= " AND YEAR(s.createdAt) = YEAR(NOW())";
+                    break;
+                case 'lm1':
+                    $query .= " AND MONTH(s.createdAt) = MONTH(NOW()) - 1 AND YEAR(s.createdAt) = YEAR(NOW())";
+                    $countQuery .= " AND MONTH(s.createdAt) = MONTH(NOW()) - 1 AND YEAR(s.createdAt) = YEAR(NOW())";
+                    break;
+                case 'lm2':
+                    $query .= " AND MONTH(s.createdAt) = MONTH(NOW()) - 2 AND MONTH(NOW()) AND YEAR(s.createdAt) = YEAR(NOW())";
+                    $countQuery .= " AND MONTH(s.createdAt) = MONTH(NOW()) - 2 AND MONTH(NOW()) AND YEAR(s.createdAt) = YEAR(NOW())";
+                    break;
+                case 'lm3':
+                    $query .= " AND MONTH(s.createdAt) = MONTH(NOW()) - 3 AND MONTH(NOW()) AND YEAR(s.createdAt) = YEAR(NOW())";
+                    $countQuery .= " AND MONTH(s.createdAt) = MONTH(NOW()) - 3 AND MONTH(NOW()) AND YEAR(s.createdAt) = YEAR(NOW())";
                     break;
             }
         }

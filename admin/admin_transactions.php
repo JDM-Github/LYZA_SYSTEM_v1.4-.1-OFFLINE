@@ -1,4 +1,4 @@
-<div class="content ms-3" id="transactions">
+<div class="content ms-3" style="width: 100%" id="transactions">
 
     <!-- Search / Category Navigation -->
     <div class="card shadow p-1 bg-body-tertiary rounded border-0 mb-3">
@@ -7,8 +7,7 @@
                 Transaction Report
             </p>
 
-            <form action="" class="border-0 d-flex m-1" method="post">
-
+            <form action="" class="border-0 d-flex m-1" method="post" id="transaction-form">
                 <style>
                     .border-dark-green {
                         background: #56AB91;
@@ -19,8 +18,7 @@
                     }
                 </style>
                 <button id="printChartButton" class="btn custom-btn-success ms-3 border-dark-green" type="button"
-                    onclick="printStockHistory()">Download
-                    History</button>
+                    onclick="printStockHistory()">Download History</button>
             </form>
 
         </div>
@@ -66,6 +64,10 @@
                     value="<?php echo $selectedDate; ?>">
                 <select class="form-select rounded mb-3 me-3" name="group-by" id="group-by">
                     <option value="">-- Group By --</option>
+                    <option value="lm1" <?php echo isSelected('lm1', $selectedGroup); ?>>Last Month</option>
+                    <option value="lm2" <?php echo isSelected('lm2', $selectedGroup); ?>>Last 2 Months</option>
+                    <option value="lm3" <?php echo isSelected('lm3', $selectedGroup); ?>>Last 3 Months
+                    </option>
                     <option value="weekly" <?php echo isSelected('weekly', $selectedGroup); ?>>Weekly</option>
                     <option value="monthly" <?php echo isSelected('monthly', $selectedGroup); ?>>Monthly</option>
                     <option value="annually" <?php echo isSelected('annually', $selectedGroup); ?>>Annually</option>
@@ -116,6 +118,13 @@
             $totalPages = $data['total'];
             $transactionArray = BranchClass::loadAllTransaction($transactions);
             BranchClass::loadPaginator($currentPage, $totalPages, 'admin-transaction-page');
+            $transaction = RequestSQL::getAllTransaction($selectedDate, $selectedGroup, $selectedOrder, $selectedStaff, 'admin', $selectedBranch, 9999)['result'];
+            $transactionArray = [];
+            if ($transaction->num_rows != 0) {
+                foreach ($transaction as $row) {
+                    $transactionArray[] = $row;
+                }
+            }
             ?>
         </div>
 

@@ -1,4 +1,4 @@
-<div class="content ms-3">
+<div class="content ms-3" style="width: 100%;">
 
     <div id="main-content">
         <div class="card shadow p-1 bg-body-tertiary rounded border-0 mb-3">
@@ -22,11 +22,7 @@
                     }
                     $selectedGroup = isset($_POST['group-by']) ? $_POST['group-by'] : $sessionGroup;
                     ?>
-                    <select class="form-select w-auto ms-3 me-3" name="group-by" id="group-by">
-                        <option value="option1" disabled>-- Select Date --</option>
-                        <option value="monthly" <?php echo isSelected('monthly', $selectedGroup); ?>>Monthly</option>
-                        <option value="annually" <?php echo isSelected('annually', $selectedGroup); ?>>Annually</option>
-                    </select>
+
 
                     <style>
                         .border-dark-green {
@@ -38,10 +34,10 @@
                         }
                     </style>
 
-                    <button class="btn btn-secondary rounded" type="submit">Search</button>
-                    <button id="printChartButton" class="btn custom-btn-success ms-3 border-dark-green"
+                    <!-- <button class="btn btn-secondary rounded" type="submit">Search</button> -->
+                    <!-- <button id="printChartButton" class="btn custom-btn-success ms-3 border-dark-green"
                         type="button">Print
-                        Chart</button>
+                        Chart</button> -->
 
                 </form>
 
@@ -98,14 +94,14 @@
 
         <div class="d-flex">
             <div class="card shadow p-3 bg-body-tertiary rounded border-0 me-3" style="flex: 1;">
-                <!---- Bar graph of 3-month or 3-year Overall Stocks depending on the filter above --------->
-                <p class="fw-bold border-start border-3 border-success ps-4">Stock Projection</p>
+                <!---- Pie graph of stock portions --------->
+                <p class="fw-bold border-start border-3 border-success ps-4">Stock Portions</p>
                 <?php
-                $stockHistory = RequestSQL::getStockHistory($selectedGroup);
-                $stockHistoryLabels = json_encode(array_column($stockHistory, 'label'));
-                $stockHistoryData = json_encode(array_column($stockHistory, 'quantity'));
+                $stockPortions = RequestSQL::getStockPortions();
+                $stockPortionLabels = json_encode(array_keys($stockPortions));
+                $stockPortionData = json_encode(array_values($stockPortions));
                 ?>
-                <canvas id="stockHistoryChart"></canvas>
+                <canvas id="stockPortionsChart" style="max-height: 300px;"></canvas>
             </div>
 
             <div class="card shadow p-3 bg-body-tertiary rounded border-0" style="width: 400px;">

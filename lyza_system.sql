@@ -55,6 +55,17 @@ CREATE TABLE productOrdered (
     FOREIGN KEY (productId) REFERENCES products(id) ON DELETE CASCADE
 );
 
+CREATE TABLE physicalCount (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    brandName VARCHAR(100),
+    genericName VARCHAR(100),
+    expiryDate DATE NOT NULL,
+    productStock INT DEFAULT 0,
+    branchId INT NOT NULL,
+    staffId INT NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE transactions (
     id INT PRIMARY KEY AUTO_INCREMENT,
     productOrderedIds JSON NOT NULL,
@@ -66,6 +77,7 @@ CREATE TABLE transactions (
     changePrice DECIMAL(10, 2) NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
+    discountID VARCHAR(50) DEFAULT "",
     seniorDiscount BOOLEAN DEFAULT FALSE,
     pwdDiscount BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (branchId) REFERENCES branch(id) ON DELETE CASCADE,

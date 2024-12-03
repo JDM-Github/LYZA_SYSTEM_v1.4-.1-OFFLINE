@@ -1,30 +1,33 @@
 <script>
-    const stockLabels = <?php echo $stockHistoryLabels; ?>;
-    const stockData = <?php echo $stockHistoryData; ?>;
+    const stockPortionLabels = <?php echo $stockPortionLabels; ?>;
+    const stockPortionData = <?php echo $stockPortionData; ?>;
 
-    new Chart(document.getElementById('stockHistoryChart').getContext('2d'), {
-        type: 'bar',
+    new Chart(document.getElementById('stockPortionsChart').getContext('2d'), {
+        type: 'pie',
         data: {
-            labels: stockLabels,
+            labels: stockPortionLabels,
             datasets: [{
-                label: 'Stock Quantity',
-                data: stockData,
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
+                label: 'Stock Status',
+                data: stockPortionData,
+                backgroundColor: [
+                    'rgba(220, 53, 69, 0.7)',
+                    'rgba(255, 193, 7, 0.7)',
+                    'rgba(40, 167, 69, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(220, 53, 69, 1)',
+                    'rgba(255, 193, 7, 1)',
+                    'rgba(40, 167, 69, 1)'
+                ],
                 borderWidth: 1
             }]
         },
         options: {
             responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: '<?php echo ucfirst($selectedGroup); ?>'
-                    }
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom'
                 }
             }
         }

@@ -624,36 +624,35 @@ class AdminClass
     static function loadAllStock($products)
     {
         echo "<table class='table table-sm table-hover'>";
-        echo '  <tr >
-                    <th class="ps-4">
-                        <small><span class="fw-bold">Branch Name</span></small>
-                    </th>
-                    <th>
-                        <small><span class="fw-bold">Brand Name</span></small>
-                    </th>
-                    <th class="ps-4">
-                        <small><span class="fw-bold">Generic Name</span></small>
-                    </th>
-                    <th class="ps-4">
-                        <small><span class="fw-bold">Category</span></small>
-                    </th>
-                    
-                    <th class="ps-4">
-                        <small><span class="fw-bold">Unit</span></small>
-                    </th>
-                    <th>
-                        <small><span class="fw-bold">Stock</span></small>
-                    </th>
-                    <th>
-                        <small><span class="fw-bold">Status</span></small>
-                    </th>
-                    <th>
-                        <small><span class="fw-bold">Price</span></small>
-                    </th>
-                    <th colspan=2>
-                        <small><span class="fw-bold">Action</span></small>
-                    </th>
-                </tr>';
+        echo '  <tr>
+                <th class="ps-4">
+                    <small><span class="fw-bold">Product Image</span></small>
+                </th>
+                <th>
+                    <small><span class="fw-bold">Brand Name</span></small>
+                </th>
+                <th class="ps-4">
+                    <small><span class="fw-bold">Generic Name</span></small>
+                </th>
+                <th class="ps-4">
+                    <small><span class="fw-bold">Category</span></small>
+                </th>
+                <th class="ps-4">
+                    <small><span class="fw-bold">Unit</span></small>
+                </th>
+                <th>
+                    <small><span class="fw-bold">Stock</span></small>
+                </th>
+                <th>
+                    <small><span class="fw-bold">Status</span></small>
+                </th>
+                <th>
+                    <small><span class="fw-bold">Price</span></small>
+                </th>
+                <th colspan="2">
+                    <small><span class="fw-bold">Action</span></small>
+                </th>
+            </tr>';
 
         $productArray = [];
         if ($products->num_rows != 0) {
@@ -666,91 +665,61 @@ class AdminClass
                     $statusClass = 'badge bg-secondary';
                 } elseif ($product['productStock'] <= 10) {
                     $stockStatus = 'Critical';
-                    $statusClass = 'badge bg-danger';
+                    $statusClass = 'text-danger fw-bold';
                 } else {
                     $stockStatus = 'Good';
                     $statusClass = 'badge bg-success';
                 }
 
-
                 $isArchived = $product['isArchived'] == "0" ? 'Archived' : 'Unarchived';
-                $modalId = 'change-modal-' . $product['id'];
                 $stockModalId = 'stock-modal-' . $product['id'];
-                $discardStockModalId = 'discard-stock-modal-' . $product['id'];
                 $editStockModalID = 'edit-stock-modal-' . $product['id'];
 
                 $product["status"] = $stockStatus;
                 $product["archive"] = $isArchived;
                 $productArray[] = $product;
 
-                echo
-                    "<tr>
-                        <td class='align-content-center ps-4'>
-                            <small><span>{$product['branchName']}</span></small>
-                        </td>
-                        <td class='align-content-center'>
-                            <span>{$product['productName']}</span>
-                        </td>
-                        <td class='align-content-center ps-4'>
-                            <span>{$product['genericBrand']}</span>
-                        </td>
-                        <td class='align-content-center ps-4'>
-                            <small><span class='badge text-bg-secondary'>{$product['productCategory']}</span></small>
-                        </td>
-                        <td class='align-content-center ps-4'>
-                            <small><span class='badge text-bg-secondary'>{$product['productUnit']}</span></small>
-                        </td>
-                        <td class='align-content-center'>
-                            <small><span class='fw-bold'>x{$product['productStock']}</span></small>
-                        </td>
-                        <td class='align-content-center'>
-                            <small><span class='{$statusClass}'>{$stockStatus}</span></small>
-                        </td>
-                        <td class='align-content-center'>
-                            <small><span class='fw-bold'>₱ {$product['productPrice']}</span></small>
-                        </td>
-
-                        <td class='align-content-center d-flex'>
-                            <form method='post' action='backend/redirector.php' onsubmit='return confirmArchive(\"{$isArchived}\")'>
-                                <input type='hidden' name='type' value='archive-product'>
-                                <input type='hidden' name='id' value='{$product['id']}'>
-                                <input type='hidden' name='is_archived' value='{$isArchived}'>
-                                <button class='btn custom-remove-btn p-1 me-2' type='submit'>
-                                    <small><i class='bi bi-trash-fill me-2'></i></i><span>{$isArchived}</span></small>
-                                </button>
-                            </form>
-                            <!--
-                            <button class='btn btn-secondary p-1 me-2' type='button' data-bs-toggle='modal' data-bs-target='#$modalId'>
-                                <small>Change Price</small>
+                echo "
+                <tr>
+                    <td class='align-content-center ps-4'>
+                        <img src='../img/{$product['productImage']}' alt='{$product['productName']}' style='max-width: 60px; max-height: 60px; object-fit: cover;'>
+                    </td>
+                    <td class='align-content-center'>
+                        <span>{$product['productName']}</span>
+                    </td>
+                    <td class='align-content-center ps-4'>
+                        <span>{$product['genericBrand']}</span>
+                    </td>
+                    <td class='align-content-center ps-4'>
+                        <small><span class='badge text-bg-secondary'>{$product['productCategory']}</span></small>
+                    </td>
+                    <td class='align-content-center ps-4'>
+                        <small><span class='badge text-bg-secondary'>{$product['productUnit']}</span></small>
+                    </td>
+                    <td class='align-content-center'>
+                        <small><span class='fw-bold'>x{$product['productStock']}</span></small>
+                    </td>
+                    <td class='align-content-center'>
+                        <small><span class='{$statusClass}'>{$stockStatus}</span></small>
+                    </td>
+                    <td class='align-content-center'>
+                        <small><span class='fw-bold'>₱ {$product['productPrice']}</span></small>
+                    </td>
+                    <td class='align-content-center'>
+                        <form method='post' action='backend/redirector.php' onsubmit='return confirmArchive(\"{$isArchived}\")'>
+                            <input type='hidden' name='type' value='archive-product'>
+                            <input type='hidden' name='id' value='{$product['id']}'>
+                            <input type='hidden' name='is_archived' value='{$isArchived}'>
+                            <button class='btn custom-remove-btn mb-2  me-3 w-100' type='submit'>
+                                <small><i class='bi bi-trash-fill mb-2'></i><span>{$isArchived}</span></small>
                             </button>
+                        </form>
 
+                        <button class='btn btn-secondary p-1 mb-2 w-100' type='button' data-bs-toggle='modal' data-bs-target='#$editStockModalID'>
+                            <small>Details</small>
+                        </button>
 
-                            " . AdminClass::getStringModal(
-                            $modalId,
-                            "Change {$product['productName']} Price",
-                            "admin-change-price",
-                            "{$product['id']}",
-                            "{$product['branch_id']}",
-                            "{$product['productName']}",
-                            "{$product['genericBrand']}",
-                            "{$product['productCategory']}",
-                            "{$product['branchName']}",
-                            "{$product['productStock']}",
-                            "{$product['productUnit']}",
-                            "{$product['productPrice']}",
-                            "{$product['productImage']}",
-                            "{$product['barCode']}",
-                            false,
-                            false,
-                            true
-                        ) . "
-                        -->
-
-                        <button class='btn btn-secondary p-1 me-2 ps-2 pe-2' type='button' data-bs-toggle='modal' data-bs-target='#$editStockModalID'>
-                                <small>Details</small>
-                            </button>
-
-                            " . AdminClass::getStringModal(
+                        " . AdminClass::getStringModal(
                             $editStockModalID,
                             "Edit {$product['productName']} Stock",
                             "edit-stock-details",
@@ -771,45 +740,12 @@ class AdminClass
                             true
                         ) . "
                         
-                            <button class='btn btn-success p-1 ps-2 pe-2' type='button' data-bs-toggle='modal' data-bs-target='#$stockModalId'>
-                                <small>Stock</small>
-                            </button>
-
-                            "
-                    .
-                    AdminClass::getProductStocksView($stockModalId, $product['productName'], $product['id'], $product['productStock'])
-                    .
-                    "
-                    <!--
-                            " . AdminClass::getStringModal(
-                            $stockModalId,
-                            "Edit {$product['productName']} Stock",
-                            "add-stock",
-                            "{$product['id']}",
-                            "{$product['branch_id']}",
-                            "{$product['productName']}",
-                            "{$product['genericBrand']}",
-                            "{$product['productCategory']}",
-                            "{$product['branchName']}",
-                            "{$product['productStock']}",
-                            "{$product['productUnit']}",
-                            "{$product['productPrice']}",
-                            "{$product['productImage']}",
-                            "{$product['barCode']}",
-                            true
-                        ) . "
-                        <button class='btn btn-danger p-1' type='button' data-bs-toggle='modal' data-bs-target='#$discardStockModalId'>
-                                <small>Discard Stock</small>
-                            </button>
-                            "
-                    .
-                    AdminClass::getDiscardStockHistory($discardStockModalId, $product['productName'], $product['id'])
-                    .
-                    "
-                    -->
-                        </td>
-
-                    </tr>";
+                        <button class='btn btn-success p-1 mb-2 w-100' type='button' data-bs-toggle='modal' data-bs-target='#$stockModalId'>
+                            <small>Stock</small>
+                        </button>
+                        " . AdminClass::getProductStocksView($stockModalId, $product['productName'], $product['id'], $product['productStock']) . "
+                    </td>
+                </tr>";
             }
         } else {
             echo "<tr><td colspan='9' class='text-center'>No products found</td></tr>";
@@ -817,6 +753,7 @@ class AdminClass
         echo "</table>";
         return $productArray;
     }
+
 }
 
 
@@ -870,21 +807,30 @@ class BranchClass
                     continue;
 
                 echo "<tr>";
-                echo "<td class='align-content-center ps-4'>";
+                // Product Image
+                echo "<td style='width: 15%; text-align: center; vertical-align: middle;'>";
+                echo "<img src='img/" . htmlspecialchars($product['productImage']) . "' alt='Product Image' style='width: 50px; height: 50px; object-fit: cover; border: 1px solid #ddd; border-radius: 4px;'>";
+                echo "</td>";
+                // Product Category and Name
+                echo "<td style='width: 30%; vertical-align: middle;'>";
                 echo "<small><span class='badge text-bg-secondary'>" . htmlspecialchars($product['productCategory']) . "</span></small><br>";
                 echo "<span class='fw-bold'>" . htmlspecialchars($product['productName']) . "</span>";
                 echo "</td>";
-                echo "<td class='align-content-center'>";
+                // Generic Brand
+                echo "<td style='width: 20%; vertical-align: middle;'>";
                 echo "<small><span class='badge text-bg-secondary'>Generic</span></small><br>";
                 echo "<small><span>" . htmlspecialchars($product['genericBrand']) . "</span></small>";
                 echo "</td>";
-                echo "<td class='align-content-center'>";
+                // Stock Information
+                echo "<td style='width: 15%; vertical-align: middle; text-align: center;'>";
                 echo "<small><span>x" . htmlspecialchars($product['productStock']) . " in stock</span></small>";
                 echo "</td>";
-                echo "<td class='align-content-center'>";
+                // Price
+                echo "<td style='width: 10%; vertical-align: middle; text-align: center;'>";
                 echo "<small><span>₱ " . htmlspecialchars($product['productPrice']) . "</span></small>";
                 echo "</td>";
-                echo "<td class='align-content-center'>";
+                // Add Button
+                echo "<td style='width: 10%; vertical-align: middle; text-align: center;'>";
                 echo "<form method='post' action='backend/redirector.php'>";
                 echo "<input type='hidden' name='type' value='branch-add-cart'>";
                 echo "<input type='hidden' name='product_id' value='" . htmlspecialchars($product['id']) . "'>";
@@ -893,16 +839,17 @@ class BranchClass
                 echo "<input type='hidden' name='product_name' value='" . htmlspecialchars($product['productName']) . "'>";
                 echo "<input type='hidden' name='product_price' value='" . htmlspecialchars($product['productPrice']) . "'>";
                 echo "<input type='hidden' name='product_stock' value='" . htmlspecialchars($product['productStock']) . "'>";
-                echo "<button class='btn btn-secondary' type='submit'><small>Add</small></button>";
+                echo "<button class='btn btn-secondary btn-sm' type='submit'><small>Add</small></button>";
                 echo "</form>";
                 echo "</td>";
                 echo "</tr>";
             }
         } else {
-            echo "<tr><td colspan='4' class='text-center'>No products found</td></tr>";
+            echo "<tr><td colspan='6' class='text-center'>No products found</td></tr>";
         }
         echo "</table>";
     }
+
 
 
     static function loadAllTransaction($transactions)
@@ -923,7 +870,8 @@ class BranchClass
                 $all_products = '';
                 foreach ($products as $product) {
                     $all_products .= "<tr>";
-                    $all_products .= "<td class='align-content-center ps-4'><span>" . htmlspecialchars($product['branchName']) . "</span></td>";
+                    $all_products .= "<td class='align-content-center ps-4'><span>" . htmlspecialchars($product['id']) . "</span></td>";
+                    $all_products .= "<td class='align-content-center'><small><span>" . htmlspecialchars($product['branchName']) . "</span></small></td>";
                     $all_products .= "<td class='align-content-center'><small><span>" . htmlspecialchars($product['productName']) . "</span></small></td>";
                     $all_products .= "<td class='align-content-center'><small><span>" . htmlspecialchars($product['numberProduct']) . "</span></small></td>";
                     $all_products .= "<td class='align-content-center'><small><span>₱" . htmlspecialchars($product['productPrice']) . "</span></small></td>";
@@ -1065,13 +1013,7 @@ class BranchClass
                                                 Person with Disability Discount
                                             </label>
                                         </div>
-                                        <div class='ms-3 form-check'>
-                                            <input class='form-check-input' type='radio' id='seniorAndPwdDiscount' name='discount' value='seniorAndPwd'
-                                                " . (($row['seniorDiscount'] && $row['pwdDiscount']) ? 'checked' : '') . ">
-                                            <label class='form-check-label' for='seniorAndPwdDiscount'>
-                                                Senior & PWD Discount
-                                            </label>
-                                        </div>
+
                                     </form>
                                 </div>
                                 
@@ -1092,13 +1034,17 @@ class BranchClass
                                     </h5>
                                     <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
                                 </div>
-                                
+                                <div class='px-4 mb-3 mt-3'>
+                                    <strong>Discount ID:</strong> <span>{$row['discountID']}</span>
+                                </div>
                                 <div class='card card shadow p-2 bg-body-tertiary rounded border-1'>
+
                                     <div class='modal-body'>
                                         <table class='table table-sm table-hover' id='productDetailsTable'>
                                             <thead>
                                                 <tr>
-                                                    <th class='ps-4'><small><span class='fw-bold'>Branch Name</span></small></th>
+                                                    <th class='ps-4'><small><span class='fw-bold'>Product ID</span></small></th>
+                                                    <th class=''><small><span class='fw-bold'>Branch Name</span></small></th>
                                                     <th class=''><small><span class='fw-bold'>Product Name</span></small></th>
                                                     <th class=''><small><span class='fw-bold'>Quantity</span></small></th>
                                                     <th class=''><small><span class='fw-bold'>Price</span></small></th>
@@ -1170,48 +1116,50 @@ class BranchClass
     static function loadAllStock($products)
     {
         echo "<table class='table table-sm table-hover'>";
-        echo '  <tr >
-                    <th class="ps-4">
-                        <small><span class="fw-bold">Branch Name</span></small>
-                    </th>
-                    <th >
-                        <small><span class="fw-bold">Brand Name</span></small>
-                    </th>
-                    <th>
-                        <small><span class="fw-bold">Generic Name</span></small>
-                    </th>
-                    <th class="ps-4">
-                        <small><span class="fw-bold">Category</span></small>
-                    </th>
-                    <th class="ps-4">
-                        <small><span class="fw-bold">Unit</span></small>
-                    </th>
-                    <th>
-                        <small><span class="fw-bold">Stock</span></small>
-                    </th>
-                    <th>
-                        <small><span class="fw-bold">Status</span></small>
-                    </th>
-                    <th>
-                        <small><span class="fw-bold">Price</span></small>
-                    </th>
-                    <th>
-                        <small><span class="fw-bold">Action</span></small>
-                    </th>
-                </tr>';
+        echo '  
+    <tr>
+        <th class="ps-4">
+            <small><span class="fw-bold">Product Image</span></small>
+        </th>
+        <th>
+            <small><span class="fw-bold">Branch Name</span></small>
+        </th>
+        <th>
+            <small><span class="fw-bold">Brand Name</span></small>
+        </th>
+        <th>
+            <small><span class="fw-bold">Generic Name</span></small>
+        </th>
+        <th class="ps-4">
+            <small><span class="fw-bold">Category</span></small>
+        </th>
+        <th class="ps-4">
+            <small><span class="fw-bold">Unit</span></small>
+        </th>
+        <th>
+            <small><span class="fw-bold">Stock</span></small>
+        </th>
+        <th>
+            <small><span class="fw-bold">Status</span></small>
+        </th>
+        <th>
+            <small><span class="fw-bold">Price</span></small>
+        </th>
+        <th>
+            <small><span class="fw-bold">Action</span></small>
+        </th>
+    </tr>';
 
         $productArray = [];
         if ($products->num_rows != 0) {
             while ($product = $products->fetch_assoc()) {
                 $stockStatus = '';
-                $statusClass = '';
-
                 if ($product['productStock'] == 0) {
                     $stockStatus = 'Out of Stock';
                     $statusClass = 'badge bg-secondary';
                 } elseif ($product['productStock'] <= 10) {
                     $stockStatus = 'Critical';
-                    $statusClass = 'badge bg-danger';
+                    $statusClass = 'text-danger fw-bold';
                 } else {
                     $stockStatus = 'Good';
                     $statusClass = 'badge bg-success';
@@ -1221,38 +1169,39 @@ class BranchClass
 
                 $isArchived = $product['productPrice'] ? 'Archived' : 'Unarchived';
                 $modalId = 'details-modal-' . $product['id'];
-                echo
-                    "<tr>
-                        <td class='align-content-center ps-4'>
-                            <span>{$product['branchName']}</span>
-                        </td>
-                        <td class='align-content-center'>
-                            <span>{$product['productName']}</span>
-                        </td>
-                        <td class='align-content-center'>
-                            <span>{$product['genericBrand']}</span>
-                        </td>
-                        <td class='align-content-center ps-4'>
-                            <small><span class='badge text-bg-secondary'>{$product['productCategory']}</span></small>
-                        </td>
-                        <td class='align-content-center ps-4'>
-                            <small><span class='badge text-bg-secondary'>{$product['productUnit']}</span></small>
-                        </td>
-                        
-                        <td class='align-content-center'>
-                            <small><span class='fw-bold'>x{$product['productStock']}</span></small>
-                        </td>
-                        <td class='align-content-center'>
-                            <small><span class='{$statusClass}'>{$stockStatus}</span></small>
-                        </td>
-                        <td class='align-content-center'>
-                            <small><span class='fw-bold'>₱ {$product['productPrice']}</span></small>
-                        </td>
-                        <td class='align-content-center'>
-                            <button class='btn btn-sm btn-secondary rounded' type='button' data-bs-toggle='modal'
-                                data-bs-target='#$modalId'>Stock</button>
+                echo "
+            <tr>
+                <td class='align-content-center ps-4'>
+                    <img src='img/{$product['productImage']}' alt='Product Image' style='width: 40px; height: 40px; object-fit: cover;'>
+                </td>
+                <td class='align-content-center'>
+                    <span>{$product['branchName']}</span>
+                </td>
+                <td class='align-content-center'>
+                    <span>{$product['productName']}</span>
+                </td>
+                <td class='align-content-center'>
+                    <span>{$product['genericBrand']}</span>
+                </td>
+                <td class='align-content-center ps-4'>
+                    <small><span class='badge text-bg-secondary'>{$product['productCategory']}</span></small>
+                </td>
+                <td class='align-content-center ps-4'>
+                    <small><span class='badge text-bg-secondary'>{$product['productUnit']}</span></small>
+                </td>
+                <td class='align-content-center'>
+                    <small><span class='fw-bold'>x{$product['productStock']}</span></small>
+                </td>
+                <td class='align-content-center'>
+                    <small><span class='{$statusClass}'>{$stockStatus}</span></small>
+                </td>
+                <td class='align-content-center'>
+                    <small><span class='fw-bold'>₱ {$product['productPrice']}</span></small>
+                </td>
+                <td class='align-content-center'>
+                    <button class='btn btn-sm btn-secondary rounded' type='button' data-bs-toggle='modal' data-bs-target='#$modalId'>Stock</button>
 
-                            " . AdminClass::getStringModal(
+                    " . AdminClass::getStringModal(
                             $modalId,
                             "Add {$product['productName']} Stock",
                             "add-stock",
@@ -1269,76 +1218,168 @@ class BranchClass
                             "{$product['barCode']}",
                             true
                         ) . "
-                        <!--
-                            <button class='btn btn-sm btn-danger rounded' type='button' data-bs-toggle='modal'
-                                data-bs-target='#u$modalId'>Discard</button>
-                                -->
-
-                            " .
-                    AdminClass::getDiscardStockHistory("$modalId", $product['productName'], $product['id'])
-                    . "
-                        </td>
-
-                    </tr>";
+                    " . AdminClass::getDiscardStockHistory("$modalId", $product['productName'], $product['id']) . "
+                </td>
+            </tr>";
             }
         } else {
-            echo "<tr><td colspan='4' class='text-center'>No products found</td></tr>";
+            echo "<tr><td colspan='10' class='text-center'>No products found</td></tr>";
         }
         echo "</table>";
         return $productArray;
     }
 
 
+    static function loadAllPhysicalCounts($physicalCounts)
+    {
+        echo "<table class='table table-sm table-hover'>";
+        echo '  
+            <tr>
+                <th class="ps-4">
+                    <small><span class="fw-bold">Branch Name</span></small>
+                </th>
+                <th>
+                    <small><span class="fw-bold">Staff</span></small>
+                </th>
+                <th>
+                    <small><span class="fw-bold">Brand Name</span></small>
+                </th>
+                <th>
+                    <small><span class="fw-bold">Generic Name</span></small>
+                </th>
+                <th class="ps-4">
+                    <small><span class="fw-bold">Expiry Date</span></small>
+                </th>
+                <th class="ps-4">
+                    <small><span class="fw-bold">Stock</span></small>
+                </th>  
+                <th>
+                    <small><span class="fw-bold">Created At</span></small>
+                </th>   
+            </tr>';
+
+        $physicalArray = [];
+        if ($physicalCounts->num_rows != 0) {
+            while ($count = $physicalCounts->fetch_assoc()) {
+                $physicalArray[] = $count;
+                echo "
+                    <tr>
+                        <td class='align-content-center ps-4'>
+                            <span>{$count['branchName']}</span>
+                        </td>
+                        <td class='align-content-center'>
+                            <span>{$count['userName']}</span>
+                        </td>
+                        <td class='align-content-center'>
+                            <span>{$count['brandName']}</span>
+                        </td>
+                        <td class='align-content-center'>
+                            <span>{$count['genericName']}</span>
+                        </td>                        
+                        <td class='align-content-center ps-4'>
+                            <span>{$count['expiryDate']}</span>
+                        </td>
+                        <td class='align-content-center ps-4'>
+                            <span class='fw-bold'>{$count['productStock']}</span>
+                        </td>
+                        <td class='align-content-center'>
+                            <span>{$count['createdAt']}</span>
+                        </td>
+
+                    </tr>";
+            }
+        } else {
+            echo "<tr><td colspan='7' class='text-center'>No physical counts found</td></tr>";
+        }
+        echo "</table>";
+        return $physicalArray;
+    }
+
+
+
+
+
     static function loadPaginator($currentPage, $totalPages, $name)
     {
+        // Set the maximum width for pagination container
+        echo '<div style="overflow-x: auto; white-space: nowrap; max-width: 100%;">';
         echo '<nav class="d-flex justify-content-between">';
         echo '<ul class="pagination custom-pagination">';
-        if ($currentPage > 1) {
-            echo "
-                <li class='page-item'>
-                    <a class='page-link' href='#' data-page='" . ($currentPage - 1) . "'>
-                        <i class='bi bi-arrow-left'></i>
-                    </a>
-                </li>";
-        } else {
-            echo
-                "<li class='page-item disabled'>
-                    <a class='page-link' href='#'>
-                        <i class='bi bi-arrow-left'></i>
-                    </a>
-                </li>";
+
+        // Check if we need to display arrows (if total pages exceed a certain number)
+        if ($totalPages > 10) {
+            echo "<li class='page-item'>
+                <a class='page-link' href='#' id='prev-page'>
+                    <i class='bi bi-chevron-left'></i>
+                </a>
+              </li>";
         }
 
+        // Loop through the pages and display them
         for ($i = 1; $i <= $totalPages; $i++) {
             $activeClass = ($i == $currentPage) ? 'active' : '';
-            echo
-                "<form action='backend/redirector.php' method='POST'>
-                    <li class='page-item $activeClass'>
-                        <input type='hidden' name='page' value='{$i}'>
-                        <input type='hidden' name='type' value='$name'>
-                        <button class='page-link' type='submit'>$i</button>
-                    </li>
-                </form>";
+            echo "<form action='backend/redirector.php' method='POST'>
+                <li class='page-item $activeClass'>
+                    <input type='hidden' name='page' value='{$i}'>
+                    <input type='hidden' name='type' value='$name'>
+                    <button class='page-link' type='submit'>$i</button>
+                </li>
+              </form>";
         }
-        if ($currentPage < $totalPages) {
-            echo
-                "<li class='page-item'>
-                    <a class='page-link' href='#' data-page='" . ($currentPage + 1) . "'>
-                        <i class='bi bi-arrow-right'></i>
-                    </a>
-                </li>";
-        } else {
-            echo
-                "<li class='page-item disabled'>
-                    <a class='page-link' href='#'>
-                        <i class='bi bi-arrow-right'></i>
-                    </a>
-                </li>";
+
+        // Display right arrow if needed
+        if ($totalPages > 10) {
+            echo "<li class='page-item'>
+                <a class='page-link' href='#' id='next-page'>
+                    <i class='bi bi-chevron-right'></i>
+                </a>
+              </li>";
         }
+
         echo '</ul>';
-        // echo "<button class='btn btn-secondary' type='submit'><small>SUBMIT</small></button>";
         echo '</nav>';
+        echo '</div>';
+
+        // Add JavaScript for the arrow functionality
+        echo "<script>
+            const prevPage = document.getElementById('prev-page');
+            const nextPage = document.getElementById('next-page');
+            const pagination = document.querySelector('.custom-pagination');
+            const itemsPerPage = 10; // Number of pages visible at once
+            
+            let offset = 0;
+            
+            // Move pagination left
+            prevPage && prevPage.addEventListener('click', function() {
+                offset = Math.max(0, offset - itemsPerPage);
+                updatePagination();
+            });
+            
+            // Move pagination right
+            nextPage && nextPage.addEventListener('click', function() {
+                offset += itemsPerPage;
+                updatePagination();
+            });
+            
+            // Update pagination based on offset
+            function updatePagination() {
+                const pages = Array.from(pagination.children);
+                const totalPages = pages.length - 2; // Exclude arrows
+                pages.forEach((page, index) => {
+                    if (index < offset || index > offset + itemsPerPage - 1) {
+                        page.style.display = 'none';
+                    } else {
+                        page.style.display = '';
+                    }
+                });
+                prevPage && (prevPage.style.display = offset === 0 ? 'none' : '');
+                nextPage && (nextPage.style.display = offset >= totalPages - itemsPerPage ? 'none' : '');
+            }
+            
+            updatePagination();
+          </script>";
     }
+
 }
 
 
