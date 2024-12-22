@@ -1,6 +1,6 @@
-DROP DATABASE IF EXISTS lyza_system;
-CREATE DATABASE IF NOT EXISTS lyza_system;
-USE lyza_system;
+-- DROP DATABASE IF EXISTS lyza_system;
+-- CREATE DATABASE IF NOT EXISTS lyza_system;
+-- USE lyza_system;
 
 -- SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
 
@@ -43,6 +43,8 @@ CREATE TABLE products (
     productImage VARCHAR(100) DEFAULT "",
     productDescription VARCHAR(100) DEFAULT "",
     isArchived BOOLEAN DEFAULT FALSE,
+    physicalCount INT DEFAULT NULL,
+    investigation VARCHAR(255) DEFAULT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (branchId) REFERENCES branch(id) ON DELETE CASCADE
 );
@@ -124,8 +126,8 @@ INSERT INTO staff (userId) VALUES
 (4),
 (5);
 
-INSERT INTO products (branchId, barCode, productName, productPrice, productStock, productCategory, productImage, genericBrand, productUnit) VALUES
-(2, '12345', 'Alaxan', 30, 0, 'Medicine', 'Alaxan.jpeg', 'Paracetamol', 'Tablet'),
-(3, '23456', 'Biogesic', 50, 0, 'Supplement', 'Biogesic.png', 'Paracetamol', 'Tablet');
+-- INSERT INTO products (branchId, barCode, productName, productPrice, productStock, productCategory, productImage, genericBrand, productUnit) VALUES
+-- (2, '12345', 'Alaxan', 30, 0, 'Medicine', 'Alaxan.jpeg', 'Paracetamol', 'Tablet'),
+-- (3, '23456', 'Biogesic', 50, 0, 'Supplement', 'Biogesic.png', 'Paracetamol', 'Tablet');
 
 

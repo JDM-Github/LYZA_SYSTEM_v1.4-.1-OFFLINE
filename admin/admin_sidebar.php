@@ -19,10 +19,10 @@
             <i class="bi bi-bag-fill fs-4 py-3 px-4"></i>
         </a>
         <!----- Physical Count Status ----->
-        <a class="link-offset-2 link-underline link-underline-opacity-0 d-flex justify-content-center"
+        <!-- <a class="link-offset-2 link-underline link-underline-opacity-0 d-flex justify-content-center"
             href="admin.php?page=physical-count" id="products-tab">
             <i class="bi bi-boxes fs-4 py-3 px-4"></i>
-        </a><br>
+        </a><br> -->
         <!----- Product Status ----->
         <a class="link-offset-2 link-underline link-underline-opacity-0 d-flex justify-content-center"
             href="admin.php?page=product-report" id="products-tab">

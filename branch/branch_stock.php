@@ -4,7 +4,7 @@
     <div class="card shadow p-1 bg-body-tertiary rounded border-0 mb-3">
         <div class="d-flex justify-content-between">
             <p class="fw-bold border-start border-3 border-success px-4 m-3 mb-4">
-                Branch Products
+                Inventory
             </p>
 
             <form action="" class="border-0 d-flex m-1" method="post">
@@ -20,7 +20,7 @@
                 </style>
                 <button id="printChartButton" class="btn custom-btn-success me-2 mt-1 mb-1 border-dark-green"
                     type="button" onclick="printStockHistory()">Download
-                    History</button>
+                    Report</button>
             </form>
 
         </div>
@@ -95,6 +95,7 @@
         <div>
             <?php
             $branchTarget = RequestSQL::getSession('account')['branchName'];
+            $userName = RequestSQL::getSession('account')['userName'];
             $data = RequestSQL::getAllProduct(
                 'branch-stock',
                 $selectedCategory,

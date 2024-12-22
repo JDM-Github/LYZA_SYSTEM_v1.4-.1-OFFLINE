@@ -37,72 +37,17 @@
                 Filter
             </p> -->
 
-            <!-- <form action="" class="form-control border-0 d-flex bg-body-tertiary" method="post">
-                <?php
-                $categories = RequestSQL::getAllCategories();
-
-                $sessionCategory = '';
-                $sessionStatus = '';
-                $sessionArchived = '';
-
-                $branch = RequestSQL::getSession('branch-stock');
-                if ($branch) {
-                    $sessionCategory = $branch['category'];
-                    $sessionStatus = $branch['status'];
-                    $sessionArchived = $branch['archived'];
-                }
-
-                $selectedCategory = isset($_POST['item-category']) ? $_POST['item-category'] : $sessionCategory;
-                $selectedStatus = isset($_POST['item-status']) ? $_POST['item-status'] : $sessionStatus;
-                $selectedArchived = isset($_POST['item-archived']) ? $_POST['item-archived'] : $sessionArchived;
-
-                function isSelected($option, $selectedValue)
-                {
-                    return $option === $selectedValue ? 'selected' : '';
-                }
-                ?>
-
-                <select class="form-select rounded mb-3 me-3" name="item-category" id="item-category">
-                    <option value="">-- Select Category --</option>
-                    <?php
-                    if ($categories) {
-                        while ($category = $categories->fetch_assoc()) {
-                            $categoryName = $category['category_name'];
-                            echo "<option value='{$categoryName}' " . isSelected($categoryName, $selectedCategory) . ">{$categoryName}</option>";
-                        }
-                    }
-                    ?>
-                </select>
-
-                <select class="form-select rounded mb-3 me-3" name="item-status" id="item-status">
-                    <option value="">-- Select Status --</option>
-                    <option value="good" <?php echo isSelected('good', $selectedStatus); ?>>Good</option>
-                    <option value="critical" <?php echo isSelected('critical', $selectedStatus); ?>>Critical</option>
-                    <option value="out-of-stock" <?php echo isSelected('out-of-stock', $selectedStatus); ?>>Out of Stock
-                    </option>
-                </select>
-
-                <select class="form-select rounded mb-3 me-3" name="item-archived" id="item-archived">
-                    <option value="narchived" <?php echo isSelected('narchived', $selectedArchived); ?>>
-                        Not Archived
-                    </option>
-                    <option value="archived" <?php echo isSelected('archived', $selectedArchived); ?>>
-                        Archived
-                    </option>
-                </select>
-
-                <button class="btn btn-secondary mb-3 rounded" type="submit">Search</button>
-            </form> -->
-
         </div>
 
         <div>
             <?php
-            $branchTarget = RequestSQL::getSession('account')['assignedBranch'];
+            $branchID = RequestSQL::getSession('account')['assignedBranch'];
+            $branchTarget = RequestSQL::getSession('account')['branchName'];
+            $userName = RequestSQL::getSession('account')['userName'];
             $data = RequestSQL::getAllPhysicalCount(
                 null,
                 null,
-                $branchTarget
+                $branchID
             );
             $result = $data['result'];
             $currentPage = $data['page'];

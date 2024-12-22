@@ -641,13 +641,22 @@ class AdminClass
                     <small><span class="fw-bold">Unit</span></small>
                 </th>
                 <th>
+                    <small><span class="fw-bold">Price</span></small>
+                </th>
+                <th>
                     <small><span class="fw-bold">Stock</span></small>
                 </th>
                 <th>
                     <small><span class="fw-bold">Status</span></small>
                 </th>
                 <th>
-                    <small><span class="fw-bold">Price</span></small>
+                    <small><span class="fw-bold">Physical Count</span></small>
+                </th>
+                <th>
+                    <small><span class="fw-bold">Disperancy</span></small>
+                </th>
+                <th>
+                    <small><span class="fw-bold">Investigation</span></small>
                 </th>
                 <th colspan="2">
                     <small><span class="fw-bold">Action</span></small>
@@ -657,6 +666,13 @@ class AdminClass
         $productArray = [];
         if ($products->num_rows != 0) {
             while ($product = $products->fetch_assoc()) {
+                if (!isset($product['physicalCount'])) {
+                    $physicalCount = "NOT SET";
+                    $disperancy = "NOT SET";
+                } else {
+                    $physicalCount = $product['physicalCount'] ?? 0;
+                    $disperancy = $product['productStock'] - $physicalCount;
+                }
                 $stockStatus = '';
                 $statusClass = '';
 
@@ -697,13 +713,22 @@ class AdminClass
                         <small><span class='badge text-bg-secondary'>{$product['productUnit']}</span></small>
                     </td>
                     <td class='align-content-center'>
+                        <small><span class='fw-bold'>₱ {$product['productPrice']}</span></small>
+                    </td>
+                    <td class='align-content-center'>
                         <small><span class='fw-bold'>x{$product['productStock']}</span></small>
                     </td>
                     <td class='align-content-center'>
                         <small><span class='{$statusClass}'>{$stockStatus}</span></small>
                     </td>
                     <td class='align-content-center'>
-                        <small><span class='fw-bold'>₱ {$product['productPrice']}</span></small>
+                        <small><span class='fw-bold'>$physicalCount</span></small>
+                    </td>
+                    <td class='align-content-center'>
+                        <small><span class='fw-bold'>$disperancy</span></small>
+                    </td>
+                    <td class='align-content-center'>
+                        <small><span class='fw-bold'>{$product['investigation']}</span></small>
                     </td>
                     <td class='align-content-center'>
                         <form method='post' action='backend/redirector.php' onsubmit='return confirmArchive(\"{$isArchived}\")'>
@@ -784,7 +809,6 @@ class BranchClass
                         </iframe>
 
                         <div class='modal-body border-0 p-4'>
-
                             <!-- Details -->
                             <h3 class='fs-5 fw-bolder border-bottom border-1 border-success py-3'>Lyza Drugmart {$branch['branch_name']}</h3>
                             <div class='py-3'>
@@ -798,6 +822,46 @@ class BranchClass
                 </div>
             </div>";
     }
+
+    static function createPhysicalCountModal($modal_id, $product_id, $stock, $physicalCount, $investigation)
+    {
+        return <<<HTML
+            <div class="modal fade" id="$modal_id" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalLabel">Physical Count</h5>
+                            <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+                        </div>
+                        <div class="modal-body">
+                            <form action="backend/redirector.php" method="POST" id="$modal_id-form">
+                                <input name="type" type="hidden" value="add-physical-count">
+                                <input name="product_id" type="hidden" value="$product_id">
+                                <div class="form-group mb-3">
+                                    <label for="system-stock">System Stock</label>
+                                    <input type="number" class="form-control" id="system-stock" value="$stock" readonly>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="physical-count">Physical Count</label>
+                                    <input type="number" class="form-control" id="physical-count" name="physical_count" placeholder="Enter physical count" value="$physicalCount" required>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="investigation">Investigation (Optional)</label>
+                                    <textarea class="form-control" id="investigation" name="investigation" placeholder="Enter investigation notes">$investigation</textarea>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss='modal'>Close</button>
+                            <button type="submit" class="btn btn-secondary" form='$modal_id-form'>Submit</button>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+HTML;
+    }
+
     static function loadAllPosProduct($products)
     {
         echo "<table class='table table-sm table-hover'>";
@@ -1137,13 +1201,19 @@ class BranchClass
             <small><span class="fw-bold">Unit</span></small>
         </th>
         <th>
+            <small><span class="fw-bold">Price</span></small>
+        </th>
+        <th>
             <small><span class="fw-bold">Stock</span></small>
         </th>
         <th>
             <small><span class="fw-bold">Status</span></small>
         </th>
         <th>
-            <small><span class="fw-bold">Price</span></small>
+            <small><span class="fw-bold">Physical Count</span></small>
+        </th>
+        <th>
+            <small><span class="fw-bold">Disperancy</span></small>
         </th>
         <th>
             <small><span class="fw-bold">Action</span></small>
@@ -1153,6 +1223,13 @@ class BranchClass
         $productArray = [];
         if ($products->num_rows != 0) {
             while ($product = $products->fetch_assoc()) {
+                if (!isset($product['physicalCount'])) {
+                    $physicalCount = "NOT SET";
+                    $disperancy = "NOT SET";
+                } else {
+                    $physicalCount = $product['physicalCount'] ?? 0;
+                    $disperancy = $product['productStock'] - $physicalCount;
+                }
                 $stockStatus = '';
                 if ($product['productStock'] == 0) {
                     $stockStatus = 'Out of Stock';
@@ -1190,16 +1267,23 @@ class BranchClass
                     <small><span class='badge text-bg-secondary'>{$product['productUnit']}</span></small>
                 </td>
                 <td class='align-content-center'>
+                    <small><span class='fw-bold'>₱ {$product['productPrice']}</span></small>
+                </td>
+                <td class='align-content-center'>
                     <small><span class='fw-bold'>x{$product['productStock']}</span></small>
                 </td>
                 <td class='align-content-center'>
                     <small><span class='{$statusClass}'>{$stockStatus}</span></small>
                 </td>
                 <td class='align-content-center'>
-                    <small><span class='fw-bold'>₱ {$product['productPrice']}</span></small>
+                    <small><span class='fw-bold'>{$physicalCount}</span></small>
+                </td>
+                <td class='align-content-center'>
+                    <small><span class='fw-bold'>$disperancy</span></small>
                 </td>
                 <td class='align-content-center'>
                     <button class='btn btn-sm btn-secondary rounded' type='button' data-bs-toggle='modal' data-bs-target='#$modalId'>Stock</button>
+                    <button class='btn btn-sm btn-secondary rounded' type='button' data-bs-toggle='modal' data-bs-target='#$modalId-physical'>Physical Count</button>
 
                     " . AdminClass::getStringModal(
                             $modalId,
@@ -1219,6 +1303,7 @@ class BranchClass
                             true
                         ) . "
                     " . AdminClass::getDiscardStockHistory("$modalId", $product['productName'], $product['id']) . "
+                    " . BranchClass::createPhysicalCountModal($modalId . "-physical", $product['id'], $product['productStock'], $product['physicalCount'] ?? 0, $product['investigation'] ?? '') . "
                 </td>
             </tr>";
             }

@@ -96,6 +96,8 @@
 
         <div>
             <?php
+            $branchTarget = RequestSQL::getSession('account')['branchName'];
+            $userName = RequestSQL::getSession('account')['userName'];
             $data = RequestSQL::getAllTransaction(
                 $selectedDate,
                 $selectedGroup,
@@ -277,7 +279,19 @@
                     <hr>
                     <p>Thank you!</p>
                     <hr>
-                    <div class='space'></div>
+                    <div style='height: 5px'></div>
+                    <p style="text-align: center;">------TEAR-HERE------</p>
+                    <div style='height: 5px'></div>    
+                    <hr>
+                    <p>How's our Service?</p>
+                    <div>If you have recommendations, Please fill out this form then drop to the branch dropbox.</div>
+                    <div class='space'></div>    
+                    <hr>
+                    <div style='height: 5px'></div> 
+                    <hr>
+                    <div style='height: 5px'></div> 
+                    <hr>
+                    <div style='height: 5px'></div> 
                 </div>
             </body>
         </html>

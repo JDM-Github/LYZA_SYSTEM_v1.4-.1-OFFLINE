@@ -44,9 +44,14 @@ if (isset($_SESSION['success-message'])) {
     <!----- Socials ------------------------------------------------------------------------------->
     <div class="socials">
         <div class="container d-flex social-content justify-content-center">
-            <i class="bi bi-facebook text-white ms-5 me-2 my-auto display-1"></i>
-            <i class="bi bi-tiktok text-white mx-2 my-auto display-1"></i>
-            <i class="bi bi-envelope-at-fill text-white mx-2 my-auto display-1"></i>
+            <a href="https://www.facebook.com/profile.php?id=61568392014508">
+                <i class="bi bi-facebook text-white ms-5 me-2 my-auto display-1">
+                </i>
+            </a>
+            <a href="https://www.facebook.com/profile.php?id=61568392014508"><i
+                    class=" bi bi-tiktok text-white mx-2 my-auto display-1"></i></a>
+            <a href="https://www.facebook.com/profile.php?id=61568392014508"><i
+                    class="bi bi-envelope-at-fill text-white mx-2 my-auto display-1"></i></a>
             <p class="fw-bold display-5 mx-4 ps-4 my-auto text-white border-start border-2 border-white">
                 Visit us and Get updates on our Social Media Platforms.
             </p>
@@ -70,13 +75,15 @@ if (isset($_SESSION['success-message'])) {
 
                     <!-- Socials and Gmail -->
                     <div class="d-flex">
-                        <a class="link-offset-2 link-underline link-underline-opacity-0" href="#">
+                        <a class="link-offset-2 link-underline link-underline-opacity-0"
+                            href="https://www.facebook.com/profile.php?id=61568392014508">
                             <i class="bi bi-facebook fs-3 me-3"></i>
                         </a>
-                        <a class="link-offset-2 link-underline link-underline-opacity-0" href="#">
+                        <a class="link-offset-2 link-underline link-underline-opacity-0"
+                            href="https://www.tiktok.com/@lyzadrugmart?lang=en">
                             <i class="bi bi-tiktok fs-3 me-3"></i>
                         </a>
-                        <a class="link-offset-2 link-underline link-underline-opacity-0" href="#">
+                        <a class="link-offset-2 link-underline link-underline-opacity-0" href="Lyzadrugmart@gmail.com">
                             <i class="bi bi-envelope-at-fill fs-3 me-3"></i>
                         </a>
                     </div>

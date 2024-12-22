@@ -81,12 +81,14 @@ $searchValue = isset($_SESSION['client-search-value']) ? $_SESSION['client-searc
 
                     while ($row = $product->fetch_assoc()): ?>
                         <div class="col-sm-2">
-                            <div class="card shadow border-0 rounded-4 mb-3">
+                            <div class="card shadow border-0 rounded-4 mb-3 same-height-card">
                                 <img src="img/<?php echo $row['productImage']; ?>" alt=""
                                     class="img-thumbnail border-0 rounded-top-4 mx-auto" width="150">
                                 <div class="text-center">
                                     <span class="badge bg-secondary"><?php echo $row['productCategory']; ?></span>
-                                    <p class="text-center"><?php echo $row['productName']; ?></p>
+                                    <p class="text-center" style="font-size: 14px; !important">
+                                        <?php echo $row['productName']; ?>
+                                    </p>
                                     <h1 class="fw-bold">₱
                                         <?php echo $row['productPrice']; ?>
                                     </h1>
@@ -94,7 +96,6 @@ $searchValue = isset($_SESSION['client-search-value']) ? $_SESSION['client-searc
                                 </div>
                             </div>
                         </div>
-
                     <?php endwhile; ?>
 
                 </div>

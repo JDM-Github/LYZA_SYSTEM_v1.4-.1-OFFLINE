@@ -4,7 +4,8 @@
     <div class="container d-flex justify-content-center">
         <img src="img/LyzaVectorLogoWhite.png" class="me-3 align-self-center" alt="Lyza Drugmart" width="32"
             height="32">
-        <span class="text-white align-self-center"><small>Copyright © 2024 Lyza Drugmart. All Rights
+        <span class="text-white align-self-center" style="font-size: 14px; !important"><small>Copyright © 2024 Lyza
+                Drugmart. All Rights
                 Reserved.</small></span>
     </div>
 </footer>

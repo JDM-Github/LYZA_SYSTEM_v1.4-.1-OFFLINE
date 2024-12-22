@@ -12,10 +12,10 @@
             <i class="bi bi-file-earmark-text-fill fs-4 py-3 px-4"></i>
         </a>
 
-        <a class="link-offset-2 link-underline link-underline-opacity-0 d-flex justify-content-center"
+        <!-- <a class="link-offset-2 link-underline link-underline-opacity-0 d-flex justify-content-center"
             href="branch.php?page=counts" id="transaction-branch-tab">
             <i class="bi bi-boxes fs-4 py-3 px-4"></i>
-        </a>    
+        </a> -->
         <!-- Products -->
         <a class="link-offset-2 link-underline link-underline-opacity-0 d-flex justify-content-center"
             href="branch.php?page=stocks" id="stock-branch-tab">

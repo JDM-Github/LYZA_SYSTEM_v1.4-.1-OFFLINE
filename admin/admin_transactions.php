@@ -118,13 +118,13 @@
             $totalPages = $data['total'];
             $transactionArray = BranchClass::loadAllTransaction($transactions);
             BranchClass::loadPaginator($currentPage, $totalPages, 'admin-transaction-page');
-            $transaction = RequestSQL::getAllTransaction($selectedDate, $selectedGroup, $selectedOrder, $selectedStaff, 'admin', $selectedBranch, 9999)['result'];
-            $transactionArray = [];
-            if ($transaction->num_rows != 0) {
-                foreach ($transaction as $row) {
-                    $transactionArray[] = $row;
-                }
-            }
+            // $transaction = RequestSQL::getAllTransaction($selectedDate, $selectedGroup, $selectedOrder, $selectedStaff, 'admin', $selectedBranch, 9999, 0)['result'];
+            // $transactionArray = [];
+            // if ($transaction->num_rows != 0) {
+            //     foreach ($transaction as $row) {
+            //         $transactionArray[] = $row;
+            //     }
+            // }
             ?>
         </div>
 
@@ -276,7 +276,19 @@
                     <hr>
                     <p>Thank you!</p>
                     <hr>
-                    <div class='space'></div>
+                    <div style='height: 5px'></div>
+                    <p style="text-align: center;">------TEAR-HERE------</p>
+                    <div style='height: 5px'></div>    
+                    <hr>
+                    <p>How's our Service?</p>
+                    <div>If you have recommendations, Please fill out this form then drop to the branch dropbox.</div>
+                    <div class='space'></div>    
+                    <hr>
+                    <div style='height: 5px'></div> 
+                    <hr>
+                    <div style='height: 5px'></div> 
+                    <hr>
+                    <div style='height: 5px'></div> 
                 </div>
             </body>
         </html>
@@ -285,6 +297,8 @@
         printWindow.print();
         printWindow.close();
     }
+
+    // shinare pa saken ung gdrive na video para lang malaman ko daw sino sino un, kase sabe ko diko kilala, kase nga naka dump
 
 </script>
 <?php include_once "modals/admin/addTransaction.php" ?>

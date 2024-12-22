@@ -8,7 +8,7 @@ $increase = ($total ? number_format($total, 2) : 0) >= ($oldTotal ? number_forma
 <!-- Total Revenue ----->
 <div class="card shadow p-3 custom-success-bg rounded border-0 me-3 flex-fill">
     <div class="d-flex justify-content-between">
-        <h2 class="m-0 display-5 text-white">
+        <h2 class="m-0 display-5 text-white" style="font-size: 36px; !important">
             <strong>₱
                 <?php echo $total ? number_format($total, 2) : 0 ?>
             </strong>
@@ -21,11 +21,11 @@ $increase = ($total ? number_format($total, 2) : 0) >= ($oldTotal ? number_forma
         </h2>
         <strong><i class="bi bi-stars display-5 text-white"></i></strong>
     </div>
-    <p class="m-0 text-white"><small>Total Revenue</small></p>
+    <p class="m-0 text-white" style="font-size: 14px; !important"><small>Total Revenue</small></p>
 </div>
 
 <div class="card shadow p-3 bg-body-tertiary rounded border-0" style="flex: 1;">
-    <p class="fw-bold border-start border-3 border-success ps-4">Latest Transactions</p>
+    <p class="fw-bold border-start border-3 border-success ps-4">History of Transactions</p>
 
     <?php
     $data = RequestSQL::getAllAdminLatestTransaction($selectedGroup);

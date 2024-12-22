@@ -28,23 +28,18 @@ class BranchHandler
 
     static function addPhysicalCount()
     {
-        $brandName = $_POST['brandName'];
-        $genericName = $_POST['genericName'];
-        $expiryDate = $_POST['expiryDate'] ?: null;
-        $quantity = (int) $_POST['quantity'];
-        $staffId = $_SESSION['account']['id'];
-        $branchId = $_SESSION['account']['assignedBranch'];
+        $product_id = $_POST["product_id"];
+        $physical = $_POST["physical_count"];
+        $investigation = $_POST["investigation"];
 
         $database = new MySQLDatabase();
         $session = new Session();
-
         $query = "
-            INSERT INTO physicalCount (brandName, genericName, expiryDate, productStock, branchId, staffId)
-            VALUES (?, ?, ?, ?, ?, ?)
+            UPDATE products SET physicalCount = ?, investigation = ? WHERE id = ?;
         ";
-        $database->prepexec($query, $brandName, $genericName, $expiryDate, $quantity, $branchId, $staffId);
+        $database->prepexec($query, $physical, $investigation, $product_id);
         $session->set('success-message', "Physical saved successfully!");
-        header("Location: ../branch.php?page=counts");
+        header("Location: ../branch.php?page=stocks");
     }
 
     static function setBranchTransactionPage()
@@ -90,10 +85,11 @@ class BranchHandler
 
 
         $productStock = $_POST['product_stock'];
-        $product_quantity = $_POST['product_quantity'] ?? 1;
+        $product_quantity = $_POST['product_quantity'] ?? NULL;
         foreach ($branchProducts as $key => &$product) {
             if ($product['product_id'] == $_POST['product_id']) {
-                if ($product['quantity'] != $product_quantity) {
+
+                if ($product_quantity != NULL && $product['quantity'] != $product_quantity) {
                     $product['quantity'] = $product_quantity;
 
                     if ($product['quantity'] > $productStock)
@@ -113,6 +109,11 @@ class BranchHandler
                         $product['quantity'] -= 1;
                     else
                         unset($branchProducts[$key]);
+                } else {
+                    if ($product['quantity'] < $productStock) {
+                        $product['quantity'] += 1;
+                        $product['product_quantity'] = $product['quantity'];
+                    }
                 }
                 $productExists = true;
                 break;

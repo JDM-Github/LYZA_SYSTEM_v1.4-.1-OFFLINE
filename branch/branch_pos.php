@@ -4,7 +4,6 @@ $_SESSION['current_url'] = $currentUrl;
 ?>
 <!-- Item Browser -->
 <div class="content ms-3 flex-fill content-section active" id="pos">
-
     <!-- Search / Category Navigation -->
 
     <div class=" card shadow p-2 bg-body-tertiary rounded border-0 mb-3 ">
@@ -35,6 +34,8 @@ $_SESSION['current_url'] = $currentUrl;
         </form>
     </div>
 
+    <!-- html, css, js, composer(laravel), php -->
+
     <!-- Product Grid -->
 
 
@@ -49,6 +50,7 @@ $_SESSION['current_url'] = $currentUrl;
 
         <div>
             <?php
+
             $data = RequestSQL::getAllProduct(
                 'branch-pos',
                 null,
@@ -162,10 +164,9 @@ $_SESSION['current_url'] = $currentUrl;
         </div>
 
         <div class="input-group align-content-center">
-            <label class="form-label text-muted me-5 ps-2 pt-2 " for="cash-input">Cash Received:</label>
+            <label class="form-label text-muted me-5 ps-2 pt-2" for="cash-input">Cash Received:</label>
             <span class="input-group-text border-0">₱</span>
-            <input type="number" min="0" class="form-control rounded pt-2 mb-2 text-end" placeholder="00.00"
-                id="cash-input">
+            <input type="text" class="form-control rounded pt-2 mb-2 text-end" placeholder="00.00" id="cash-input">
         </div>
 
         <div class="d-flex justify-content-between">
@@ -181,7 +182,9 @@ $_SESSION['current_url'] = $currentUrl;
 
         <div id="idNumberField" class="mt-3 mb-2" style="display: none;">
             <label for="idNumber" class="form-label">Enter ID Number:</label>
-            <input type="number" class="form-control" id="idNumber" placeholder="Enter your ID number" required>
+            <input type="text" class="form-control" id="idNumber" name="idNumber" pattern="^\d{8}$"
+                title="ID Number must be exactly 8 digits long and should not contain letters or symbols."
+                placeholder="Enter your ID number" required>
         </div>
 
         <div class="p-3 bg-body-secondary rounded-4">
@@ -224,6 +227,59 @@ $_SESSION['current_url'] = $currentUrl;
 
     </div>
 </div>
+
+<script>
+
+
+    document.getElementById('idNumber').addEventListener('keypress', function (e) {
+        const idNumberField = e.target;
+        if (!/^\d$/.test(e.key)) {
+            e.preventDefault();
+        }
+        if (idNumberField.value.length >= 12) {
+            e.preventDefault();
+        }
+    });
+
+    document.getElementById('idNumber').addEventListener('input', function (e) {
+        const idNumberField = e.target;
+        idNumberField.value = idNumberField.value.replace(/\D/g, '').slice(0, 8);
+    });
+
+
+    document.getElementById('cash-input').addEventListener('keypress', function (e) {
+        const cashInputField = e.target;
+        const value = cashInputField.value;
+
+        if (!/^\d$/.test(e.key) && e.key !== '.') {
+            e.preventDefault();
+        }
+
+        if (e.key === '.' && value.includes('.')) {
+            e.preventDefault();
+        }
+
+        if (value.length >= 8 && e.key !== 'Backspace') {
+            e.preventDefault();
+        }
+    });
+
+    document.getElementById('cash-input').addEventListener('input', function (e) {
+        const cashInputField = e.target;
+        let value = cashInputField.value;
+        value = value.replace(/[^0-9.]/g, '');
+        const parts = value.split('.');
+
+        if (parts.length > 2) {
+            value = parts[0] + '.' + parts[1];
+        }
+        if (parts[1] && parts[1].length > 2) {
+            value = parts[0] + '.' + parts[1].slice(0, 2);
+        }
+
+        cashInputField.value = value.slice(0, 8);
+    });
+</script>
 
 <div id="errorToast" class="toast align-items-center border-0 shadow-lg" role="alert" aria-live="assertive"
     aria-atomic="true"

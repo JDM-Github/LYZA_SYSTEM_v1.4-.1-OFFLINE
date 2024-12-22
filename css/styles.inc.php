@@ -34,6 +34,14 @@
         font-size: 0.70rem;
     }
 
+    .same-height-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        /* Makes all cards the same height */
+    }
+
 
     /* Custom Modal Styles */
     .custom-modal2 {

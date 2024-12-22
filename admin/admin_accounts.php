@@ -131,7 +131,15 @@
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
-                        <input type="text" class="form-control" id="password" name="password" required>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" name="password"
+                                pattern="^(?=.*[a-z])(?=.*[A-Z])[a-zA-Z]{6,}$"
+                                title="Password must be at least 6 characters long and include both uppercase and lowercase letters. No special symbols allowed."
+                                required>
+                            <button type="button" class="btn btn-outline-secondary" id="togglePassword">
+                                <i class="bi bi-eye-slash" id="passwordIcon"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <?php $branches = RequestSQL::getAllBranches(); ?>
@@ -150,7 +158,14 @@
                             ?>
                         </select>
                     </div>
-
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="dataPrivacyCheck" name="dataPrivacyCheck"
+                            required>
+                        <label for="dataPrivacyCheck" class="form-check-label">
+                            I agree to the Privacy Policy and consent to the collection and use of my personal data in
+                            accordance with the Data Privacy Act of 2012.
+                        </label>
+                    </div>
                 </form>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
@@ -160,6 +175,20 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('togglePassword').addEventListener('click', function () {
+        const passwordField = document.getElementById('password');
+        const passwordIcon = document.getElementById('passwordIcon');
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            passwordIcon.classList.replace('bi-eye-slash', 'bi-eye');
+        } else {
+            passwordField.type = 'password';
+            passwordIcon.classList.replace('bi-eye', 'bi-eye-slash');
+        }
+    });
+</script>
 
 <div class="modal fade" id="createBranchModal" tabindex="-1" aria-labelledby="createBranchModalLabel"
     aria-hidden="true">
